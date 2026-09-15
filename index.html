@@ -1,0 +1,2982 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rocket Mobile — Media Performance Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F4F6F9; --panel:#FFFFFF; --raised:#EDF1F6; --border:#D6DEE8;
+  --text:#131A24; --muted:#5A6879;
+  --amber:#B9791A; --teal:#12855F; --coral:#C33B2F; --violet:#5D4DC4; --steel:#2C6A9E;
+  --c-axis:#5A6879; --c-grid:#C9D4E1; --c-label:#131A24;
+  --c-teal:#12855F; --c-teal-d:#0C5F44;
+  --c-coral:#C33B2F;
+  --c-steel:#1F5B8A; --c-steel-l:#63A0CE;
+  --c-amber:#B9791A;
+  --c-violet:#5D4DC4;
+  --c-slate:#64748B; --c-slate-d:#78899F;
+  --shade:rgba(0,0,0,.05);
+}
+[data-theme="dark"]{
+  --bg:#151A24; --panel:#1E2530; --raised:#262F3D; --border:#3B4759;
+  --text:#EFF2F6; --muted:#9AA7BA;
+  --amber:#E5A445; --teal:#4CBE93; --coral:#E8796C; --violet:#9B8CF0; --steel:#6E9FC9;
+  --c-axis:#9AA7BA; --c-grid:#515F79; --c-label:#EFF2F6;
+  --c-teal:#4CBE93; --c-teal-d:#2F7A5C;
+  --c-coral:#E8796C;
+  --c-steel:#4E87B8; --c-steel-l:#A9CDE8;
+  --c-amber:#E5A445;
+  --c-violet:#9B8CF0;
+  --c-slate:#8795AB; --c-slate-d:#7B8AA0;
+  --shade:rgba(255,255,255,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.dp{font-family:'Space Grotesk',sans-serif}
+.n{font-family:'Space Grotesk',monospace;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 22px 60px}
+
+.masthead{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;
+  flex-wrap:wrap;padding-bottom:18px;margin-bottom:18px;border-bottom:1px solid var(--border)}
+.brand{display:flex;gap:11px;align-items:center}
+.bars{display:flex;align-items:flex-end;gap:3px;height:21px}
+.bars span{width:5px;background:var(--amber);border-radius:1px;display:block}
+.bars span:nth-child(1){height:7px}.bars span:nth-child(2){height:12px}
+.bars span:nth-child(3){height:16px}.bars span:nth-child(4){height:21px}
+.brand h1{margin:0;font-size:18px;font-weight:600;letter-spacing:-.01em}
+.brand p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
+
+.tabs{display:flex;gap:4px;background:var(--panel);padding:4px;border-radius:8px;border:1px solid var(--border);flex-wrap:wrap}
+.tb{border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:13px;
+  font-weight:500;padding:8px 15px;border-radius:6px;cursor:pointer;transition:.15s}
+.tb.active{background:var(--raised);color:var(--text)}
+.tb:hover:not(.active):not(:disabled){color:var(--text)}
+.theme-tog{margin-left:8px;border:1px solid var(--border);background:var(--panel);
+  color:var(--muted);font-family:inherit;font-size:12px;font-weight:500;padding:8px 12px;
+  border-radius:8px;cursor:pointer;transition:.15s}
+.theme-tog:hover{color:var(--text)}
+.view{display:none}.view.active{display:block}
+
+.datebar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  font-size:12.5px;color:var(--muted);margin-bottom:18px}
+.pill{background:var(--panel);border:1px solid var(--border);border-radius:6px;
+  padding:5px 11px;color:var(--text);font-size:12.5px}
+
+.hero{display:flex;gap:26px;align-items:center;flex-wrap:wrap;background:var(--panel);
+  border:1px solid var(--border);border-radius:10px;padding:22px 24px;margin-bottom:18px}
+.hero .big{font-size:42px;font-weight:600;line-height:1}
+.hero .big small{display:block;font-size:12.5px;font-weight:500;color:var(--muted);margin-top:7px}
+.hero p{margin:0;max-width:60ch;font-size:13.5px;line-height:1.6;color:var(--muted)}
+.hero p b{color:var(--text);font-weight:500}
+.hero.warn{border-color:rgba(224,106,93,.4);background:linear-gradient(180deg,rgba(224,106,93,.07),transparent)}
+
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px}
+.kpi{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:15px 16px}
+.kpi .lbl{font-size:11.5px;color:var(--muted);margin:0 0 7px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.kpi .val{font-size:25px;font-weight:600;margin:0;line-height:1}
+.kpi .val.sm{font-size:21px}
+.kpi .dl{font-size:11.5px;margin:7px 0 0}
+.up{color:var(--teal)}.down{color:var(--coral)}.flat{color:var(--muted)}
+.dl .pv{color:var(--muted)}
+
+h2.sect{font-size:14.5px;font-weight:600;margin:26px 0 3px}
+p.ss{font-size:12.5px;color:var(--muted);margin:0 0 13px;max-width:90ch;line-height:1.55}
+
+table{width:100%;border-collapse:collapse;margin-bottom:6px}
+thead th{text-align:left;font-size:12px;font-weight:500;color:var(--muted);
+  padding:0 9px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+thead th.r,tbody td.r,thead th:not(:first-child),tbody td:not(:first-child){text-align:right}
+tbody td{padding:9px;border-bottom:1px solid var(--border);font-size:13px;white-space:nowrap}
+tbody td:first-child{text-align:left}
+tbody tr.tot td{font-weight:600;border-top:1px solid var(--border);border-bottom:none;
+  background:var(--shade)}
+td.stacked{white-space:normal}td.stacked .small{display:block;margin-top:2px;font-size:11px;color:var(--muted)}
+.small{font-size:11px;color:var(--muted)}
+.mini-bar{display:inline-block;width:64px;height:6px;background:var(--shade);border-radius:3px;overflow:hidden;vertical-align:middle;margin-left:8px}
+.mini-bar i{display:block;height:100%;background:var(--teal)}
+.dot{display:inline-block;width:7px;height:7px;border-radius:2px;margin-right:7px;vertical-align:middle}
+.tag{display:inline-block;font-size:10.5px;font-weight:500;padding:2px 7px;border-radius:4px;margin-left:6px}
+.tag.ok,.tag.conversion{background:rgba(76,190,147,.15);color:var(--teal)}
+.tag.no{background:rgba(224,106,93,.15);color:var(--coral)}
+.tag.na,.tag.offline{background:var(--shade);color:var(--muted)}
+.tag.aw,.tag.awareness{background:rgba(229,164,69,.15);color:var(--amber)}
+.tag.manual{background:rgba(93,77,196,.15);color:var(--violet)}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
+.card h3{margin:0 0 3px;font-size:13.5px;font-weight:600}
+.card .sub{margin:0 0 14px;font-size:12px;color:var(--muted);line-height:1.5}
+
+.rr{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;
+  border-bottom:1px solid var(--border);font-size:12.5px}
+.rr:last-child{border-bottom:none}
+.rr .k{color:var(--muted)}
+.rr .v{font-weight:600}
+.rr.hl .v{color:var(--amber)}
+
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12.5px}
+.bar-row .nm{width:150px;flex-shrink:0}
+.bar-row .track{flex:1;background:var(--shade);height:18px;border-radius:4px;overflow:hidden;position:relative}
+.bar-row .fill{display:block;height:100%;border-radius:4px}
+.bar-row .target-mark{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--text);opacity:.55}
+.bar-row .fig{width:150px;text-align:right;flex-shrink:0;color:var(--muted)}
+.bar-row .fig b{color:var(--text)}
+
+svg.chart{width:100%;height:auto;display:block}
+svg.chart rect{stroke:var(--panel);stroke-width:0.9}
+.legend{display:flex;gap:15px;flex-wrap:wrap;font-size:11.5px;color:var(--muted);margin-top:12px}
+
+.trend-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:860px){.trend-grid{grid-template-columns:1fr}}
+.status-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:22px}
+.status-card{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:13px 14px}
+.status-card .sh{display:flex;align-items:center;gap:7px;margin-bottom:8px}
+.status-card .sdot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.status-card .sname{font-size:11.5px;font-weight:600;color:var(--text)}
+.status-card .sval{font-size:18px;font-weight:600;margin:0 0 4px;font-family:'Space Grotesk',monospace}
+.status-card .ssub{font-size:11px;color:var(--muted);line-height:1.4;margin:0}
+@media(max-width:860px){.status-grid{grid-template-columns:repeat(2,1fr)}}
+
+.callout{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:19px 22px;margin-top:18px}
+.callout h3{margin:0 0 12px;font-size:13.5px;font-weight:600}
+.callout ol{margin:0;padding-left:19px}
+.callout li{font-size:12.5px;line-height:1.65;color:var(--muted);margin-bottom:9px}
+.callout li:last-child{margin-bottom:0}
+.callout li b{color:var(--text);font-weight:500}
+
+.note{font-size:12px;color:var(--muted);line-height:1.6;background:var(--panel);
+  border:1px dashed var(--border);border-radius:9px;padding:14px 17px;margin-top:18px}
+.note b,.note h4{color:var(--text);font-weight:600}
+.note h4{font-size:12.5px;margin:14px 0 4px}
+.note h4:first-child{margin-top:0}
+.note p{margin:0 0 10px}
+.note p:last-child{margin-bottom:0}
+.note ul{margin:8px 0 0;padding-left:18px}
+.note li{margin-bottom:5px}
+
+footer{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.6;
+  border-top:1px solid var(--border);padding-top:15px}
+
+.daterange-controls{display:flex;gap:20px;flex-wrap:wrap;margin-bottom:14px;font-size:12.5px;color:var(--muted)}
+.daterange-controls select,.daterange-controls input{font-family:inherit;font-size:12.5px;padding:6px 9px;
+  border:1px solid var(--border);border-radius:6px;margin-left:6px;background:var(--panel);color:var(--text)}
+#hist-select{font-family:inherit;font-size:12.5px;padding:6px 10px;border:1px solid var(--border);
+  border-radius:6px;margin-bottom:14px;background:var(--panel);color:var(--text)}
+
+@media(max-width:860px){
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .split{grid-template-columns:1fr}
+  .hero{flex-direction:column;align-items:flex-start}
+}
+</style></head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="brand">
+      <div class="bars"><span></span><span></span><span></span><span></span></div>
+      <div>
+        <h1 class="dp">Rocket Mobile — Media Performance</h1>
+        <p>Sep 1-14 · data through 14 Sep 2026</p>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center">
+      <div class="tabs">
+        <button class="tb active" data-v="top">Topline</button>
+        <button class="tb" data-v="channels">Channels</button>
+        <button class="tb" data-v="budget">Budget</button>
+        <button class="tb" data-v="trends">Trends</button>
+        <button class="tb" data-v="history">History</button>
+      </div>
+      <button class="theme-tog" id="themeTog" aria-label="Switch colour theme">Dark mode</button>
+    </div>
+  </div>
+
+<div class="view active" id="view-top">
+  <div class="datebar">
+    <span class="pill">Sep 1-14</span>
+    <span>vs Aug 1-14 (same elapsed days) · run-rate vs August 2026 (full month)</span>
+  </div>
+  
+  <div class='hero'><div class='big dp' style='color:var(--teal)'>990<small>SERVCO gross adds, Sep 1-14</small></div><p><b>Run-rate spend is $115,492, 0.1% over the $115,326 plan.</b> Blended CPA is $54 against $42 for August 2026 at the same elapsed days — includes Radio, prorated $12,885 of its $30,066 booked flight.</p></div><div class='kpis'><div class='kpi'><p class='lbl'>Blended CPA<span class='pill'>Target ≤ $54.92</span></p><p class='val n'>$54.44</p><p class='dl down'>▲ 30.2% <span class='pv'>from $41.83</span></p></div><div class='kpi'><p class='lbl'>SERVCO Gross Adds<span class='pill'>Target 2,100</span></p><p class='val n'>990</p><p class='dl up'>▲ 8.3% <span class='pv'>from 914</span></p></div><div class='kpi'><p class='lbl'>Blended Spend (incl. Radio)<span class='pill'>Plan $115,326</span></p><p class='val n'>$53,896</p><p class='dl down'>▲ 41.0% <span class='pv'>from $38,228</span></p></div><div class='kpi'><p class='lbl'>GA4 Sessions<span class='pill'>Target 62,302</span></p><p class='val n'>33,574</p><p class='dl up'>▲ 13.4% <span class='pv'>from 29,601</span></p></div></div><div class='split' style='margin-top:14px'><div class='card'><h3>Run-rate vs plan</h3><p class='sub'>MTD projected to a full month, against this month's targets. The vertical mark on each track shows where the target sits.</p><div class='bar-row'><span class='nm'>Blended CPA</span><span class='track'><span class='fill' style='width:71%;background:var(--teal)'></span><span class='target-mark' style='left:71.4%'></span></span><span class='fig n'><b>$54.44</b> / $54.92 target <span style='color:var(--teal)'>(99%)</span></span></div><div class='bar-row'><span class='nm'>SERVCO Gross Adds</span><span class='track'><span class='fill' style='width:72%;background:var(--teal)'></span><span class='target-mark' style='left:71.4%'></span></span><span class='fig n'><b>2,121</b> / 2,100 target <span style='color:var(--teal)'>(101%)</span></span></div><div class='bar-row'><span class='nm'>Blended Spend</span><span class='track'><span class='fill' style='width:72%;background:var(--coral)'></span><span class='target-mark' style='left:71.4%'></span></span><span class='fig n'><b>$115,492</b> / $115,326 target <span style='color:var(--coral)'>(100%)</span></span></div><div class='bar-row'><span class='nm'>GA4 Sessions</span><span class='track'><span class='fill' style='width:82%;background:var(--teal)'></span><span class='target-mark' style='left:71.4%'></span></span><span class='fig n'><b>71,944</b> / 62,302 target <span style='color:var(--teal)'>(115%)</span></span></div></div><div class='card'><h3>Radio (NZME) — booked flight</h3><p class='sub'>Aug-Sept 2026 Module · 31 Aug – 4 Oct 2026, prorated for blending only (not a live pacing feed).</p><div class='rr'><span class='k'>Booked total</span><span class='v n'>$30,066</span></div><div class='rr'><span class='k'>Elapsed</span><span class='v n'>15 of 35 days</span></div><div class='rr hl'><span class='k'>Estimated spend to date</span><span class='v n'>$12,885</span></div></div></div>
+</div>
+
+<div class="view" id="view-channels">
+  <h2 class='sect' style='margin-top:0'>Channel &amp; source performance</h2><p class='ss'>Sep 1-14. Paid channels (own platform data) and GA4 traffic sources in one table.</p><table><tr><th>Channel / Source</th><th class='r'>Spend (MTD)</th><th class='r'>Run-rate Spend</th><th class='r'>CPC</th><th class='r'>Sessions (MTD)</th><th class='r'>Run-rate Sessions</th><th class='r'>Bounce Rate</th><th class='r'>Avg. Time on Site</th><th class='r'>Custom Conv.</th><th class='r'>Conv. Rate</th><th class='r'>CPA</th></tr><tr><td><span class='dot' style='background:var(--c-steel)'></span>Google Search<span class='tag ok'>Paid</span></td><td class='r'>$27,709</td><td class='r stacked'>$59,377<span class='small'><span class="up">+10.8%</span></span></td><td class='r'>$3.44</td><td class='r'>9,346</td><td class='r stacked'>20,027<span class='small'><span class="down">-2.7%</span></span></td><td class='r'>32.9%</td><td class='r'>5m 8s</td><td class='r'>460.4</td><td class='r'>4.93%</td><td class='r'>$60.19</td></tr><tr><td><span class='dot' style='background:var(--c-steel-l)'></span>Google PMax<span class='tag ok'>Paid</span></td><td class='r'>$4,791</td><td class='r stacked'>$10,267<span class='small'><span class="up">+8.0%</span></span></td><td class='r'>$1.49</td><td class='r'>2,408</td><td class='r stacked'>5,160<span class='small'><span class="up">+28.7%</span></span></td><td class='r'>53.3%</td><td class='r'>1m 35s</td><td class='r'>11.0</td><td class='r'>0.46%</td><td class='r'>$437.10</td></tr><tr><td><span class='dot' style='background:var(--c-violet)'></span>Meta<span class='tag ok'>Paid</span></td><td class='r'>$6,176</td><td class='r stacked'>$13,235<span class='small'><span class="up">+2.3%</span></span></td><td class='r'>$0.78</td><td class='r'>7,661</td><td class='r stacked'>16,416<span class='small'><span class="up">+7.1%</span></span></td><td class='r'>83.2%</td><td class='r'>0m 40s</td><td class='r'>26.9</td><td class='r'>0.35%</td><td class='r'>$229.56</td></tr><tr><td><span class='dot' style='background:var(--c-teal)'></span>TikTok<span class='tag ok'>Paid</span><span class='tag manual'>manual</span></td><td class='r'>$1,435</td><td class='r stacked'>$3,074<span class='small'><span class="down">-43.7%</span></span></td><td class='r'>$0.90</td><td class='r'>1,513</td><td class='r stacked'>3,242<span class='small'><span class="down">-58.5%</span></span></td><td class='r'>95.4%</td><td class='r'>0m 18s</td><td class='r'>6.0</td><td class='r'>0.40%</td><td class='r'>$239.97</td></tr><tr><td><span class='dot' style='background:var(--c-coral)'></span>ChatGPT Ads<span class='tag ok'>Paid</span><span class='tag manual'>manual</span></td><td class='r'>$899</td><td class='r stacked'>$1,927<span class='small'><span class="down">-4.3%</span></span></td><td class='r'>$4.54</td><td class='r'>97</td><td class='r stacked'>208<span class='small'><span class="down">-61.1%</span></span></td><td class='r'>73.2%</td><td class='r'>1m 20s</td><td class='r'>0.0</td><td class='r'>0.00%</td><td class='r'>—</td></tr><tr><td><span class='dot' style='background:var(--c-amber)'></span>Radio Campaign<span class='tag na'>Offline</span></td><td class='r'>$12,885</td><td class='r stacked'>$30,066<span class='small'>On pace</span></td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td></tr><tr><td><span class='dot' style='background:var(--c-slate)'></span>Direct</td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td><td class='r'>7,151</td><td class='r stacked'>15,324<span class='small'><span class="up">+17.3%</span></span></td><td class='r'>35.8%</td><td class='r'>3m 57s</td><td class='r'>162</td><td class='r'>2.26%</td><td class='r'>—</td></tr><tr><td><span class='dot' style='background:var(--c-slate)'></span>Organic</td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td><td class='r'>4,801</td><td class='r stacked'>10,288<span class='small'><span class="up">+18.6%</span></span></td><td class='r'>32.6%</td><td class='r'>6m 15s</td><td class='r'>263</td><td class='r'>5.47%</td><td class='r'>—</td></tr><tr><td><span class='dot' style='background:var(--c-slate)'></span>AI Assistant</td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td><td class='r'>475</td><td class='r stacked'>1,018<span class='small'><span class="up">+33.8%</span></span></td><td class='r'>31.8%</td><td class='r'>6m 33s</td><td class='r'>37</td><td class='r'>7.76%</td><td class='r'>—</td></tr><tr><td><span class='dot' style='background:var(--c-slate-d)'></span>Other</td><td class='r'>—</td><td class='r'>—</td><td class='r'>—</td><td class='r'>42</td><td class='r stacked'>90<span class='small'><span class="down">-97.4%</span></span></td><td class='r'>—</td><td class='r'>—</td><td class='r'>24</td><td class='r'>56.94%</td><td class='r'>—</td></tr></table>
+</div>
+
+<div class="view" id="view-budget">
+  <h2 class='sect' style='margin-top:0'>Budget pacing — September 2026</h2><p class='ss'>MTD through 14 Sep (14 of 30 days).</p><table><tr><th>Channel</th><th class='r'>Budget</th><th class='r'>MTD spend</th><th class='r'>% spent</th><th class='r'>% month elapsed</th><th class='r'>Pace</th><th class='r'>Remaining</th></tr><tr><td><span class='dot' style='background:var(--c-steel)'></span>Google Search<span class="tag conversion">Conversion</span></td><td class='r'>$58,000</td><td class='r'>$27,709</td><td class='r'>47.8%<span class='mini-bar'><i style='width:48%'></i></span></td><td class='r'>46.7%</td><td class='r'><span class="flat">+1.1%</span></td><td class='r'>$30,291</td></tr><tr><td><span class='dot' style='background:var(--c-steel-l)'></span>Google PMax<span class="tag conversion">Conversion</span></td><td class='r'>$10,000</td><td class='r'>$4,791</td><td class='r'>47.9%<span class='mini-bar'><i style='width:48%'></i></span></td><td class='r'>46.7%</td><td class='r'><span class="flat">+1.2%</span></td><td class='r'>$5,209</td></tr><tr><td><span class='dot' style='background:var(--c-violet)'></span>Meta<span class="tag conversion">Conversion</span></td><td class='r'>$13,000</td><td class='r'>$6,176</td><td class='r'>47.5%<span class='mini-bar'><i style='width:48%'></i></span></td><td class='r'>46.7%</td><td class='r'><span class="flat">+0.8%</span></td><td class='r'>$6,824</td></tr><tr><td><span class='dot' style='background:var(--c-teal)'></span>TikTok<span class="tag conversion">Conversion</span></td><td class='r'>$5,000</td><td class='r'>$1,435</td><td class='r'>28.7%<span class='mini-bar'><i style='width:29%'></i></span></td><td class='r'>46.7%</td><td class='r'><span class="up">-18.0%</span></td><td class='r'>$3,565</td></tr><tr><td><span class='dot' style='background:var(--c-coral)'></span>ChatGPT Ads<span class="tag conversion">Conversion</span></td><td class='r'>$2,000</td><td class='r'>$899</td><td class='r'>45.0%<span class='mini-bar'><i style='width:45%'></i></span></td><td class='r'>46.7%</td><td class='r'><span class="flat">-1.7%</span></td><td class='r'>$1,101</td></tr><tr><td><span class='dot' style='background:var(--c-slate)'></span>Twitch<span class="tag awareness">Awareness</span></td><td class='r'><span class='flat'>not set</span></td><td class='r'>$0</td><td class='r'>—</td><td class='r'>46.7%</td><td class='r'>—</td><td class='r'>—</td></tr><tr><td><span class='dot' style='background:var(--c-slate)'></span>Demand Gen<span class="tag awareness">Awareness</span></td><td class='r'><span class='flat'>not set</span></td><td class='r'>$0</td><td class='r'>—</td><td class='r'>46.7%</td><td class='r'>—</td><td class='r'>—</td></tr><tr class='tot'><td>Total</td><td class='r'>$88,000</td><td class='r'>$41,011</td><td class='r'>46.6%</td><td class='r'>46.7%</td><td class='r'></td><td class='r'>$46,989</td></tr></table><h2 class='sect'>Radio (NZME) — booked flight</h2><p class='ss'>Prorated for blending into Blended Spend/CPA only — not a live pacing feed.</p><table><tr><th>Station group</th><th class='r'>Booked spend</th></tr><tr><td><span class='dot' style='background:var(--c-amber)'></span>ZM &amp; Hauraki<span class='small'> — Nationwide, 41 stations</span></td><td class='r'>$18,064</td></tr><tr><td><span class='dot' style='background:var(--c-amber)'></span>The Hits<span class='small'> — Nationwide, 26 stations</span></td><td class='r'>$8,566</td></tr><tr><td><span class='dot' style='background:var(--c-amber)'></span>Flava<span class='small'> — 5 stations</span></td><td class='r'>$3,436</td></tr><tr class='tot'><td>Total (excl. GST)</td><td class='r'>$30,066</td></tr><tr><td>Estimated spend to date (15 of 35 days)</td><td class='r'>$12,885</td></tr></table>
+</div>
+
+<div class="view" id="view-trends">
+  <h2 class='sect' style='margin-top:0'>Historical trends &amp; pacing trajectory</h2>
+<p class='ss'>Last 4 months and last 4 weeks, each ending with the current in-progress period.</p>
+<div class='card' style='margin-bottom:16px'><h3>Spend, Gross Adds &amp; CPA — last 4 months</h3>
+<svg class='chart' viewBox='0 0 640 258' role='img'><g stroke='var(--c-grid)' stroke-width='1'><line x1='58' y1='232.0' x2='622' y2='232.0'/><line x1='58' y1='162.0' x2='622' y2='162.0'/><line x1='58' y1='92.0' x2='622' y2='92.0'/><line x1='58' y1='22.0' x2='622' y2='22.0'/></g><g fill='var(--c-axis)' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='end'><text x='52' y='236.0' text-anchor='end'>$0</text><text x='52' y='166.0' text-anchor='end'>$63,722</text><text x='52' y='96.0' text-anchor='end'>$127,445</text><text x='52' y='26.0' text-anchor='end'>$191,167</text></g><rect x='98.9' y='141.5' width='59.2' height='90.5' fill='#3730e6'/><text x='128.5' y='157.5' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$82,366</text><rect x='239.9' y='119.3' width='59.2' height='112.7' fill='#3730e6'/><text x='269.5' y='135.3' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$102,582</text><rect x='380.9' y='113.7' width='59.2' height='118.3' fill='#3730e6'/><text x='410.5' y='129.7' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$107,646</text><rect x='521.9' y='87.2' width='59.2' height='144.8' fill='#3730e6'/><text x='551.5' y='103.2' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$131,839</text><polyline fill='none' stroke='#c23f95' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,34.7 269.5,29.5 410.5,29.4 551.5,29.0'/><circle cx='128.5' cy='34.7' r='4' fill='#c23f95'/><text x='128.5' y='26.7' fill='#c23f95' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>1,774</text><text x='128.5' y='13.7' fill='#c23f95' font-size='9' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$46.43</text><circle cx='269.5' cy='29.5' r='4' fill='#c23f95'/><text x='269.5' y='21.5' fill='#c23f95' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>2,092</text><text x='269.5' y='8.5' fill='#c23f95' font-size='9' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$49.04</text><circle cx='410.5' cy='29.4' r='4' fill='#c23f95'/><text x='410.5' y='21.4' fill='#c23f95' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>2,095</text><text x='410.5' y='8.4' fill='#c23f95' font-size='9' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$51.38</text><circle cx='551.5' cy='29.0' r='4' fill='#c23f95'/><text x='551.5' y='21.0' fill='#c23f95' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>2,121</text><text x='551.5' y='8.0' fill='#c23f95' font-size='9' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$62.15</text><text x='128.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Jun 2026</text><text x='269.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Jul 2026</text><text x='410.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Aug 2026</text><text x='551.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Sep 2026 (RR)</text></svg>
+<div class='legend'><span><span class='dot' style='background:#3730e6'></span>Spend ($)</span><span><span class='dot' style='background:#c23f95'></span>Gross Adds (with CPA)</span></div></div>
+<div class='card' style='margin-bottom:16px'><h3>Spend, Gross Adds &amp; CPA — last 4 weeks</h3>
+<svg class='chart' viewBox='0 0 640 258' role='img'><g stroke='var(--c-grid)' stroke-width='1'><line x1='58' y1='232.0' x2='622' y2='232.0'/><line x1='58' y1='162.0' x2='622' y2='162.0'/><line x1='58' y1='92.0' x2='622' y2='92.0'/><line x1='58' y1='22.0' x2='622' y2='22.0'/></g><g fill='var(--c-axis)' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='end'><text x='52' y='236.0' text-anchor='end'>$0</text><text x='52' y='166.0' text-anchor='end'>$14,939</text><text x='52' y='96.0' text-anchor='end'>$29,878</text><text x='52' y='26.0' text-anchor='end'>$44,816</text></g><rect x='98.9' y='115.8' width='59.2' height='116.2' fill='#3730e6'/><text x='128.5' y='131.8' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$24,789</text><rect x='239.9' y='139.5' width='59.2' height='92.5' fill='#3730e6'/><text x='269.5' y='155.5' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$19,743</text><rect x='380.9' y='87.2' width='59.2' height='144.8' fill='#3730e6'/><text x='410.5' y='103.2' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$30,908</text><rect x='521.9' y='211.0' width='59.2' height='21.0' fill='#3730e6'/><text x='551.5' y='200.0' fill='var(--c-label)' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$4,487</text><polyline fill='none' stroke='#c23f95' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,29.0 269.5,35.7 410.5,29.8 551.5,58.7'/><circle cx='128.5' cy='29.0' r='4' fill='#c23f95'/><text x='128.5' y='21.0' fill='#c23f95' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>539</text><text x='128.5' y='8.0' fill='#c23f95' font-size='9' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$45.99</text><circle cx='269.5' cy='35.7' r='4' fill='#c23f95'/><text x='269.5' y='27.7' fill='#c23f95' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>436</text><text x='269.5' y='14.7' fill='#c23f95' font-size='9' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$45.28</text><circle cx='410.5' cy='29.8' r='4' fill='#c23f95'/><text x='410.5' y='21.8' fill='#c23f95' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>526</text><text x='410.5' y='8.8' fill='#c23f95' font-size='9' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$58.76</text><circle cx='551.5' cy='58.7' r='4' fill='#c23f95'/><text x='551.5' y='50.7' fill='#c23f95' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>82</text><text x='551.5' y='37.7' fill='#c23f95' font-size='9' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$54.72</text><text x='128.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Aug 24-30</text><text x='269.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Aug 31-Sep 6</text><text x='410.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Sep 7-13</text><text x='551.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Sep 14 (MTD)</text></svg>
+<div class='legend'><span><span class='dot' style='background:#3730e6'></span>Spend ($)</span><span><span class='dot' style='background:#c23f95'></span>Gross Adds (with CPA)</span></div></div>
+
+<div class='card' style='margin-bottom:16px'><h3>Spend, Impressions &amp; Clicks — last 4 months</h3>
+<svg class='chart' viewBox='0 0 640 258' role='img'><g stroke='var(--c-grid)' stroke-width='1'><line x1='58' y1='232.0' x2='622' y2='232.0'/><line x1='58' y1='162.0' x2='622' y2='162.0'/><line x1='58' y1='92.0' x2='622' y2='92.0'/><line x1='58' y1='22.0' x2='622' y2='22.0'/></g><g fill='var(--c-axis)' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='end'><text x='52' y='236.0' text-anchor='end'>$0</text><text x='52' y='166.0' text-anchor='end'>$68,117</text><text x='52' y='96.0' text-anchor='end'>$136,234</text><text x='52' y='26.0' text-anchor='end'>$204,351</text></g><rect x='98.9' y='147.4' width='59.2' height='84.6' fill='#3730e6'/><text x='128.5' y='163.4' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$82,366</text><rect x='239.9' y='126.6' width='59.2' height='105.4' fill='#3730e6'/><text x='269.5' y='142.6' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$102,582</text><rect x='380.9' y='121.4' width='59.2' height='110.6' fill='#3730e6'/><text x='410.5' y='137.4' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$107,646</text><rect x='521.9' y='96.5' width='59.2' height='135.5' fill='#3730e6'/><text x='551.5' y='112.5' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$131,839</text><polyline fill='none' stroke='#14848c' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,59.9 269.5,31.9 410.5,33.5 551.5,39.8'/><circle cx='128.5' cy='59.9' r='4' fill='#14848c'/><text x='128.5' y='51.9' fill='#14848c' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>2,176,026</text><circle cx='269.5' cy='31.9' r='4' fill='#14848c'/><text x='269.5' y='23.9' fill='#14848c' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>5,820,976</text><circle cx='410.5' cy='33.5' r='4' fill='#14848c'/><text x='410.5' y='25.5' fill='#14848c' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>5,614,269</text><circle cx='551.5' cy='39.8' r='4' fill='#14848c'/><text x='551.5' y='31.8' fill='#14848c' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>4,791,690</text><polyline fill='none' stroke='#b8790f' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,186.1 269.5,173.3 410.5,164.3 551.5,170.3'/><circle cx='128.5' cy='186.1' r='4' fill='#b8790f'/><text x='128.5' y='203.1' fill='#b8790f' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>27,248</text><circle cx='269.5' cy='173.3' r='4' fill='#b8790f'/><text x='269.5' y='190.3' fill='#b8790f' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>41,298</text><circle cx='410.5' cy='164.3' r='4' fill='#b8790f'/><text x='410.5' y='181.3' fill='#b8790f' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>51,133</text><circle cx='551.5' cy='170.3' r='4' fill='#b8790f'/><text x='551.5' y='187.3' fill='#b8790f' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>44,582</text><text x='128.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Jun 2026</text><text x='269.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Jul 2026</text><text x='410.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Aug 2026</text><text x='551.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Sep 2026 (RR)</text></svg>
+<div class='legend'><span><span class='dot' style='background:#3730e6'></span>Spend ($)</span><span><span class='dot' style='background:#14848c'></span>Impressions</span><span><span class='dot' style='background:#b8790f'></span>Clicks</span></div></div>
+<div class='card' style='margin-bottom:16px'><h3>Spend, Impressions &amp; Clicks — last 4 weeks</h3>
+<svg class='chart' viewBox='0 0 640 258' role='img'><g stroke='var(--c-grid)' stroke-width='1'><line x1='58' y1='232.0' x2='622' y2='232.0'/><line x1='58' y1='162.0' x2='622' y2='162.0'/><line x1='58' y1='92.0' x2='622' y2='92.0'/><line x1='58' y1='22.0' x2='622' y2='22.0'/></g><g fill='var(--c-axis)' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='end'><text x='52' y='236.0' text-anchor='end'>$0</text><text x='52' y='166.0' text-anchor='end'>$15,969</text><text x='52' y='96.0' text-anchor='end'>$31,938</text><text x='52' y='26.0' text-anchor='end'>$47,907</text></g><rect x='98.9' y='123.3' width='59.2' height='108.7' fill='#3730e6'/><text x='128.5' y='139.3' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$24,789</text><rect x='239.9' y='145.5' width='59.2' height='86.5' fill='#3730e6'/><text x='269.5' y='161.5' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$19,743</text><rect x='380.9' y='96.5' width='59.2' height='135.5' fill='#3730e6'/><text x='410.5' y='112.5' fill='#fff' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$30,908</text><rect x='521.9' y='212.3' width='59.2' height='19.7' fill='#3730e6'/><text x='551.5' y='201.3' fill='var(--c-label)' font-size='10.5' font-family="Space Grotesk, monospace" text-anchor='middle'>$4,487</text><polyline fill='none' stroke='#14848c' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,31.9 269.5,37.4 410.5,38.8 551.5,71.7'/><circle cx='128.5' cy='31.9' r='4' fill='#14848c'/><text x='128.5' y='23.9' fill='#14848c' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>1,327,546</text><circle cx='269.5' cy='37.4' r='4' fill='#14848c'/><text x='269.5' y='29.4' fill='#14848c' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>1,163,300</text><circle cx='410.5' cy='38.8' r='4' fill='#14848c'/><text x='410.5' y='30.8' fill='#14848c' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>1,122,610</text><circle cx='551.5' cy='71.7' r='4' fill='#14848c'/><text x='551.5' y='63.7' fill='#14848c' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>145,801</text><polyline fill='none' stroke='#b8790f' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,164.3 269.5,176.0 410.5,176.0 551.5,206.0'/><circle cx='128.5' cy='164.3' r='4' fill='#b8790f'/><text x='128.5' y='181.3' fill='#b8790f' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>14,059</text><circle cx='269.5' cy='176.0' r='4' fill='#b8790f'/><text x='269.5' y='193.0' fill='#b8790f' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>10,532</text><circle cx='410.5' cy='176.0' r='4' fill='#b8790f'/><text x='410.5' y='193.0' fill='#b8790f' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>10,541</text><circle cx='551.5' cy='206.0' r='4' fill='#b8790f'/><text x='551.5' y='223.0' fill='#b8790f' font-size='10' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>1,503</text><text x='128.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Aug 24-30</text><text x='269.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Aug 31-Sep 6</text><text x='410.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Sep 7-13</text><text x='551.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Sep 14 (MTD)</text></svg>
+<div class='legend'><span><span class='dot' style='background:#3730e6'></span>Spend ($)</span><span><span class='dot' style='background:#14848c'></span>Impressions</span><span><span class='dot' style='background:#b8790f'></span>Clicks</span></div></div>
+
+<div class='card' style='margin-bottom:16px'><h3>CTR &amp; CPC — last 4 months</h3>
+<svg class='chart' viewBox='0 0 640 258' role='img'><g stroke='var(--c-grid)' stroke-width='1'><line x1='58' y1='232.0' x2='622' y2='232.0'/><line x1='58' y1='161.3' x2='622' y2='161.3'/><line x1='58' y1='90.7' x2='622' y2='90.7'/><line x1='58' y1='20.0' x2='622' y2='20.0'/></g><polyline fill='none' stroke='#14848c' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,36.1 269.5,65.8 410.5,54.8 551.5,53.7'/><circle cx='128.5' cy='36.1' r='4' fill='#14848c'/><text x='128.5' y='26.1' fill='#14848c' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>1.25%</text><circle cx='269.5' cy='65.8' r='4' fill='#14848c'/><text x='269.5' y='55.8' fill='#14848c' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>0.71%</text><circle cx='410.5' cy='54.8' r='4' fill='#14848c'/><text x='410.5' y='44.8' fill='#14848c' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>0.91%</text><circle cx='551.5' cy='53.7' r='4' fill='#14848c'/><text x='551.5' y='43.7' fill='#14848c' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>0.93%</text><polyline fill='none' stroke='#c23f95' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,152.7 269.5,165.0 410.5,173.4 551.5,154.1'/><circle cx='128.5' cy='152.7' r='4' fill='#c23f95'/><text x='128.5' y='170.7' fill='#c23f95' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$3.02</text><circle cx='269.5' cy='165.0' r='4' fill='#c23f95'/><text x='269.5' y='183.0' fill='#c23f95' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$2.48</text><circle cx='410.5' cy='173.4' r='4' fill='#c23f95'/><text x='410.5' y='191.4' fill='#c23f95' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$2.11</text><circle cx='551.5' cy='154.1' r='4' fill='#c23f95'/><text x='551.5' y='172.1' fill='#c23f95' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$2.96</text><text x='128.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Jun 2026</text><text x='269.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Jul 2026</text><text x='410.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Aug 2026</text><text x='551.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Sep 2026 (RR)</text></svg>
+<div class='legend'><span><span class='dot' style='background:#14848c'></span>CTR</span><span><span class='dot' style='background:#c23f95'></span>CPC</span></div></div>
+<div class='card'><h3>CTR &amp; CPC — last 4 weeks</h3>
+<svg class='chart' viewBox='0 0 640 258' role='img'><g stroke='var(--c-grid)' stroke-width='1'><line x1='58' y1='232.0' x2='622' y2='232.0'/><line x1='58' y1='161.3' x2='622' y2='161.3'/><line x1='58' y1='90.7' x2='622' y2='90.7'/><line x1='58' y1='20.0' x2='622' y2='20.0'/></g><polyline fill='none' stroke='#14848c' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,36.1 269.5,45.8 410.5,43.9 551.5,38.0'/><circle cx='128.5' cy='36.1' r='4' fill='#14848c'/><text x='128.5' y='26.1' fill='#14848c' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>1.06%</text><circle cx='269.5' cy='45.8' r='4' fill='#14848c'/><text x='269.5' y='35.8' fill='#14848c' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>0.91%</text><circle cx='410.5' cy='43.9' r='4' fill='#14848c'/><text x='410.5' y='33.9' fill='#14848c' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>0.94%</text><circle cx='551.5' cy='38.0' r='4' fill='#14848c'/><text x='551.5' y='28.0' fill='#14848c' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>1.03%</text><polyline fill='none' stroke='#c23f95' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round' points='128.5,181.0 269.5,178.4 410.5,154.1 551.5,152.7'/><circle cx='128.5' cy='181.0' r='4' fill='#c23f95'/><text x='128.5' y='199.0' fill='#c23f95' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$1.76</text><circle cx='269.5' cy='178.4' r='4' fill='#c23f95'/><text x='269.5' y='196.4' fill='#c23f95' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$1.87</text><circle cx='410.5' cy='154.1' r='4' fill='#c23f95'/><text x='410.5' y='172.1' fill='#c23f95' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$2.93</text><circle cx='551.5' cy='152.7' r='4' fill='#c23f95'/><text x='551.5' y='170.7' fill='#c23f95' font-size='10.5' font-weight='700' font-family="Space Grotesk, monospace" text-anchor='middle'>$2.99</text><text x='128.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Aug 24-30</text><text x='269.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Aug 31-Sep 6</text><text x='410.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Sep 7-13</text><text x='551.5' y='248' fill='var(--c-axis)' font-size='10.5' font-family="Inter, sans-serif" text-anchor='middle'>Sep 14 (MTD)</text></svg>
+<div class='legend'><span><span class='dot' style='background:#14848c'></span>CTR</span><span><span class='dot' style='background:#c23f95'></span>CPC</span></div></div>
+</div>
+
+<div class="view" id="view-history">
+  <h2 class='sect' style='margin-top:0'>Custom date range</h2>
+<div class='daterange-controls'>
+  <label>Preset <select id='dr-preset'>
+    <option value='7'>Last 7 days</option>
+    <option value='14'>Last 14 days</option>
+    <option value='30'>Last 30 days</option>
+    <option value='90'>Last 90 days</option>
+    <option value='all' selected>Full range (2026-05-01 – 2026-09-14)</option>
+    <option value='custom'>Custom…</option>
+  </select></label>
+  <label>From <input type='date' id='dr-from' min='2026-05-01' max='2026-09-14' value='2026-05-01'></label>
+  <label>To <input type='date' id='dr-to' min='2026-05-01' max='2026-09-14' value='2026-09-14'></label>
+</div>
+<div id='dr-body'></div>
+<script id='dr-data' type='application/json'>{
+ "dates": [
+  "2026-05-01",
+  "2026-05-02",
+  "2026-05-03",
+  "2026-05-04",
+  "2026-05-05",
+  "2026-05-06",
+  "2026-05-07",
+  "2026-05-08",
+  "2026-05-09",
+  "2026-05-10",
+  "2026-05-11",
+  "2026-05-12",
+  "2026-05-13",
+  "2026-05-14",
+  "2026-05-15",
+  "2026-05-16",
+  "2026-05-17",
+  "2026-05-18",
+  "2026-05-19",
+  "2026-05-20",
+  "2026-05-21",
+  "2026-05-22",
+  "2026-05-23",
+  "2026-05-24",
+  "2026-05-25",
+  "2026-05-26",
+  "2026-05-27",
+  "2026-05-28",
+  "2026-05-29",
+  "2026-05-30",
+  "2026-05-31",
+  "2026-06-01",
+  "2026-06-02",
+  "2026-06-03",
+  "2026-06-04",
+  "2026-06-05",
+  "2026-06-06",
+  "2026-06-07",
+  "2026-06-08",
+  "2026-06-09",
+  "2026-06-10",
+  "2026-06-11",
+  "2026-06-12",
+  "2026-06-13",
+  "2026-06-14",
+  "2026-06-15",
+  "2026-06-16",
+  "2026-06-17",
+  "2026-06-18",
+  "2026-06-19",
+  "2026-06-20",
+  "2026-06-21",
+  "2026-06-22",
+  "2026-06-23",
+  "2026-06-24",
+  "2026-06-25",
+  "2026-06-26",
+  "2026-06-27",
+  "2026-06-28",
+  "2026-06-29",
+  "2026-06-30",
+  "2026-07-01",
+  "2026-07-02",
+  "2026-07-03",
+  "2026-07-04",
+  "2026-07-05",
+  "2026-07-06",
+  "2026-07-07",
+  "2026-07-08",
+  "2026-07-09",
+  "2026-07-10",
+  "2026-07-11",
+  "2026-07-12",
+  "2026-07-13",
+  "2026-07-14",
+  "2026-07-15",
+  "2026-07-16",
+  "2026-07-17",
+  "2026-07-18",
+  "2026-07-19",
+  "2026-07-20",
+  "2026-07-21",
+  "2026-07-22",
+  "2026-07-23",
+  "2026-07-24",
+  "2026-07-25",
+  "2026-07-26",
+  "2026-07-27",
+  "2026-07-28",
+  "2026-07-29",
+  "2026-07-30",
+  "2026-07-31",
+  "2026-08-01",
+  "2026-08-02",
+  "2026-08-03",
+  "2026-08-04",
+  "2026-08-05",
+  "2026-08-06",
+  "2026-08-07",
+  "2026-08-08",
+  "2026-08-09",
+  "2026-08-10",
+  "2026-08-11",
+  "2026-08-12",
+  "2026-08-13",
+  "2026-08-14",
+  "2026-08-15",
+  "2026-08-16",
+  "2026-08-17",
+  "2026-08-18",
+  "2026-08-19",
+  "2026-08-20",
+  "2026-08-21",
+  "2026-08-22",
+  "2026-08-23",
+  "2026-08-24",
+  "2026-08-25",
+  "2026-08-26",
+  "2026-08-27",
+  "2026-08-28",
+  "2026-08-29",
+  "2026-08-30",
+  "2026-08-31",
+  "2026-09-01",
+  "2026-09-02",
+  "2026-09-03",
+  "2026-09-04",
+  "2026-09-05",
+  "2026-09-06",
+  "2026-09-07",
+  "2026-09-08",
+  "2026-09-09",
+  "2026-09-10",
+  "2026-09-11",
+  "2026-09-12",
+  "2026-09-13",
+  "2026-09-14"
+ ],
+ "channels": {
+  "search": {
+   "cost": [
+    1464.94,
+    1455.73,
+    1464.1,
+    1677.29,
+    1633.62,
+    1656.77,
+    1615.39,
+    1539.31,
+    1317.63,
+    1297.13,
+    1580.85,
+    1516.81,
+    1539.78,
+    1482.95,
+    1436.18,
+    1245.07,
+    1263.21,
+    1486.37,
+    1442.71,
+    1420.8,
+    1421.06,
+    1326.21,
+    1208.7,
+    1192.55,
+    1378.72,
+    1360.12,
+    1322.77,
+    1315.83,
+    1068.89,
+    943.08,
+    747.72,
+    1061.36,
+    1268.42,
+    1289.32,
+    1108.37,
+    1228.62,
+    983.99,
+    1111.82,
+    1281.53,
+    1247.26,
+    1221.71,
+    1124.79,
+    1307.46,
+    1465.42,
+    1398.78,
+    1957.37,
+    1901.76,
+    1922.5,
+    1861.7,
+    1602.31,
+    1945.45,
+    1794.46,
+    1808.77,
+    1766.2,
+    2335.56,
+    2118.06,
+    1805.87,
+    1730.37,
+    1890.98,
+    2126.65,
+    1885.38,
+    2192.75,
+    2472.67,
+    1911.98,
+    1796.86,
+    1810.25,
+    1918.44,
+    2169.04,
+    2083.1,
+    1909.71,
+    1711.43,
+    1574.59,
+    1797.53,
+    1954.67,
+    1823.83,
+    1908.53,
+    1862.69,
+    1561.61,
+    1565.82,
+    1653.18,
+    1850.42,
+    1671.55,
+    1629.66,
+    1569.4,
+    1389.26,
+    1434.46,
+    1568.21,
+    1443.67,
+    1559.68,
+    1575.77,
+    1292.37,
+    994.12,
+    1383.71,
+    1372.72,
+    1722.6,
+    1499.78,
+    2031.02,
+    2009.67,
+    1809.01,
+    1762.57,
+    1857.26,
+    2124.85,
+    1997.99,
+    1932.96,
+    2044.64,
+    1788.37,
+    1730.07,
+    1684.74,
+    1900.35,
+    1794.69,
+    1803.01,
+    1806.64,
+    1654.33,
+    1576.21,
+    1660.91,
+    2097.94,
+    1725.56,
+    1842.78,
+    1738.19,
+    1559.81,
+    1300.7,
+    1136.55,
+    1227.44,
+    1984.01,
+    1980.25,
+    1973.29,
+    1950.62,
+    1861.27,
+    1880.06,
+    2196.21,
+    2049.02,
+    2065.4293,
+    1957.2376,
+    1887.99,
+    1826.16,
+    2008.37,
+    2092.62
+   ],
+   "impr": [
+    3621,
+    3782,
+    2809,
+    3059,
+    3270,
+    3731,
+    3505,
+    3650,
+    2444,
+    3342,
+    3962,
+    3641,
+    4177,
+    3197,
+    3050,
+    3143,
+    2296,
+    3220,
+    2877,
+    3108,
+    3325,
+    3057,
+    2969,
+    3024,
+    3764,
+    3442,
+    2563,
+    3214,
+    2584,
+    2401,
+    1494,
+    2101,
+    3289,
+    2835,
+    3570,
+    3525,
+    2739,
+    3445,
+    3614,
+    3520,
+    2749,
+    3309,
+    2904,
+    3566,
+    4160,
+    5200,
+    5407,
+    5508,
+    5347,
+    4336,
+    3576,
+    3957,
+    4456,
+    4179,
+    6231,
+    5201,
+    5960,
+    5365,
+    5827,
+    6978,
+    6477,
+    7695,
+    6828,
+    5739,
+    5293,
+    5762,
+    4916,
+    5891,
+    5182,
+    5181,
+    5055,
+    4538,
+    4790,
+    6511,
+    6399,
+    6089,
+    5288,
+    4986,
+    4511,
+    4260,
+    5040,
+    5515,
+    5101,
+    3859,
+    4087,
+    3436,
+    4368,
+    4205,
+    4529,
+    4159,
+    4634,
+    2586,
+    3424,
+    3975,
+    4866,
+    4085,
+    6622,
+    6714,
+    6403,
+    5487,
+    6365,
+    7207,
+    8285,
+    6844,
+    6666,
+    6553,
+    5714,
+    5771,
+    6953,
+    5612,
+    5187,
+    5148,
+    5218,
+    5129,
+    5805,
+    5172,
+    4923,
+    5145,
+    5204,
+    3240,
+    3388,
+    2903,
+    3156,
+    5309,
+    5840,
+    4612,
+    4016,
+    4388,
+    4095,
+    6059,
+    8151,
+    7855,
+    6789,
+    5086,
+    5859,
+    6883,
+    7196
+   ],
+   "clicks": [
+    436,
+    428,
+    417,
+    615,
+    470,
+    467,
+    433,
+    471,
+    336,
+    402,
+    405,
+    447,
+    506,
+    415,
+    368,
+    334,
+    303,
+    447,
+    399,
+    462,
+    410,
+    359,
+    473,
+    368,
+    436,
+    422,
+    437,
+    385,
+    361,
+    357,
+    291,
+    399,
+    520,
+    345,
+    463,
+    424,
+    381,
+    385,
+    497,
+    480,
+    463,
+    421,
+    486,
+    457,
+    461,
+    595,
+    646,
+    617,
+    614,
+    487,
+    568,
+    522,
+    565,
+    508,
+    694,
+    647,
+    554,
+    529,
+    535,
+    652,
+    631,
+    714,
+    657,
+    546,
+    503,
+    600,
+    608,
+    678,
+    614,
+    531,
+    525,
+    449,
+    514,
+    604,
+    590,
+    643,
+    522,
+    504,
+    526,
+    569,
+    612,
+    611,
+    572,
+    555,
+    508,
+    449,
+    503,
+    523,
+    593,
+    566,
+    551,
+    450,
+    483,
+    485,
+    595,
+    625,
+    685,
+    623,
+    575,
+    557,
+    580,
+    726,
+    681,
+    674,
+    648,
+    610,
+    516,
+    557,
+    621,
+    631,
+    653,
+    577,
+    527,
+    491,
+    545,
+    642,
+    543,
+    575,
+    544,
+    455,
+    391,
+    370,
+    454,
+    608,
+    569,
+    542,
+    479,
+    510,
+    482,
+    630,
+    666,
+    618,
+    582,
+    524,
+    572,
+    625,
+    659
+   ]
+  },
+  "pmax": {
+   "cost": [
+    397.77,
+    342.54,
+    412.67,
+    269.06,
+    274.08,
+    293.88,
+    287.35,
+    247.98,
+    238.69,
+    274.51,
+    205.86,
+    205.12,
+    292.12,
+    358.77,
+    277.47,
+    228.95,
+    339.3,
+    301.51,
+    351.37,
+    248.73,
+    224.64,
+    275.07,
+    299.93,
+    256.63,
+    247.33,
+    231.65,
+    346.04,
+    283.97,
+    309.3,
+    240.76,
+    206.29,
+    294.0,
+    300.09,
+    346.74,
+    373.52,
+    322.1,
+    274.22,
+    267.77,
+    264.83,
+    314.38,
+    346.56,
+    294.87,
+    335.9,
+    361.7,
+    224.4,
+    355.41,
+    235.32,
+    330.71,
+    309.79,
+    299.13,
+    279.28,
+    274.26,
+    361.84,
+    293.92,
+    282.82,
+    270.63,
+    262.64,
+    285.24,
+    280.86,
+    295.86,
+    283.42,
+    276.97,
+    285.41,
+    260.55,
+    295.54,
+    289.73,
+    411.32,
+    340.64,
+    287.25,
+    366.57,
+    390.78,
+    237.18,
+    357.58,
+    325.28,
+    416.34,
+    261.47,
+    252.88,
+    242.86,
+    223.54,
+    220.97,
+    270.5,
+    256.97,
+    291.28,
+    252.92,
+    259.99,
+    288.03,
+    204.22,
+    259.97,
+    304.32,
+    231.76,
+    202.11,
+    247.21,
+    363.63,
+    194.44,
+    203.55,
+    202.54,
+    247.36,
+    387.6,
+    396.28,
+    479.49,
+    298.76,
+    261.62,
+    310.38,
+    347.39,
+    340.41,
+    402.6,
+    351.67,
+    296.91,
+    278.77,
+    262.8,
+    296.79,
+    299.53,
+    282.15,
+    242.09,
+    277.11,
+    369.31,
+    325.73,
+    275.69,
+    294.38,
+    339.97,
+    368.75,
+    265.74,
+    246.04,
+    317.6,
+    358.58,
+    347.41,
+    340.2,
+    345.37,
+    336.76,
+    304.25,
+    387.62,
+    339.7265,
+    359.3405,
+    339.22,
+    356.95,
+    317.49,
+    340.64
+   ],
+   "impr": [
+    30761,
+    17639,
+    15191,
+    8972,
+    10349,
+    11525,
+    9550,
+    7167,
+    10016,
+    15799,
+    11195,
+    16686,
+    68178,
+    102958,
+    57884,
+    60063,
+    9628,
+    9132,
+    7733,
+    6474,
+    5785,
+    7810,
+    8735,
+    7505,
+    6280,
+    7919,
+    15286,
+    30181,
+    45929,
+    16395,
+    9558,
+    10961,
+    13111,
+    19261,
+    21015,
+    14639,
+    17654,
+    12966,
+    14669,
+    20410,
+    22975,
+    19746,
+    11227,
+    10809,
+    9945,
+    11874,
+    12205,
+    25054,
+    20359,
+    22168,
+    26121,
+    19589,
+    12889,
+    11516,
+    13996,
+    13738,
+    11477,
+    11015,
+    9505,
+    16394,
+    12751,
+    21233,
+    20395,
+    15827,
+    11912,
+    11822,
+    9471,
+    10417,
+    9543,
+    9607,
+    16399,
+    8547,
+    8283,
+    17271,
+    28237,
+    21460,
+    8968,
+    25178,
+    21670,
+    11326,
+    7754,
+    7491,
+    8865,
+    11698,
+    14554,
+    9021,
+    10006,
+    9069,
+    8510,
+    9214,
+    9933,
+    9487,
+    15310,
+    13483,
+    7707,
+    9144,
+    17668,
+    31182,
+    29935,
+    49673,
+    22956,
+    17013,
+    17378,
+    19499,
+    17528,
+    29360,
+    28927,
+    20258,
+    14723,
+    16408,
+    26430,
+    30011,
+    25134,
+    15932,
+    11474,
+    9889,
+    9684,
+    9213,
+    9651,
+    7970,
+    12039,
+    7287,
+    8510,
+    14069,
+    12966,
+    13919,
+    12101,
+    17230,
+    16346,
+    13359,
+    13464,
+    10029,
+    16245,
+    14840,
+    29203,
+    25779,
+    22494
+   ],
+   "clicks": [
+    224,
+    147,
+    130,
+    94,
+    83,
+    83,
+    86,
+    71,
+    79,
+    109,
+    75,
+    84,
+    318,
+    530,
+    315,
+    303,
+    103,
+    110,
+    122,
+    87,
+    77,
+    88,
+    120,
+    81,
+    76,
+    90,
+    139,
+    157,
+    270,
+    125,
+    87,
+    130,
+    132,
+    153,
+    174,
+    127,
+    158,
+    130,
+    127,
+    140,
+    149,
+    133,
+    87,
+    103,
+    81,
+    111,
+    114,
+    177,
+    129,
+    98,
+    126,
+    114,
+    140,
+    108,
+    98,
+    105,
+    83,
+    90,
+    100,
+    113,
+    104,
+    140,
+    118,
+    115,
+    88,
+    111,
+    152,
+    142,
+    118,
+    155,
+    175,
+    110,
+    118,
+    175,
+    203,
+    143,
+    106,
+    149,
+    141,
+    122,
+    130,
+    135,
+    156,
+    113,
+    130,
+    80,
+    82,
+    100,
+    101,
+    91,
+    84,
+    116,
+    158,
+    117,
+    111,
+    96,
+    137,
+    230,
+    190,
+    230,
+    129,
+    99,
+    139,
+    190,
+    173,
+    302,
+    349,
+    265,
+    164,
+    130,
+    160,
+    155,
+    161,
+    138,
+    168,
+    156,
+    160,
+    144,
+    139,
+    125,
+    200,
+    120,
+    161,
+    186,
+    181,
+    203,
+    213,
+    254,
+    234,
+    199,
+    204,
+    147,
+    203,
+    210,
+    361,
+    363,
+    253
+   ]
+  },
+  "meta": {
+   "cost": [
+    99.9,
+    109.11,
+    109.8,
+    108.62,
+    93.25,
+    98.89,
+    109.3,
+    113.39,
+    107.07,
+    98.65,
+    106.26,
+    100.36,
+    106.17,
+    111.65,
+    113.29,
+    105.37,
+    107.38,
+    112.89,
+    103.68,
+    105.13,
+    102.03,
+    107.32,
+    103.49,
+    112.45,
+    105.6,
+    107.33,
+    101.38,
+    109.42,
+    114.75,
+    89.65,
+    107.75,
+    119.7,
+    108.61,
+    104.75,
+    95.72,
+    102.73,
+    93.59,
+    99.55,
+    105.72,
+    102.01,
+    122.58,
+    97.86,
+    93.21,
+    100.04,
+    113.48,
+    111.6,
+    102.23,
+    106.59,
+    90.47,
+    87.89,
+    107.99,
+    109.06,
+    115.34,
+    148.43,
+    146.46,
+    178.67,
+    186.37,
+    175.56,
+    217,
+    203.68,
+    211.78,
+    195.33,
+    132.61,
+    302.86,
+    327.43,
+    382.68,
+    433.13,
+    404.82,
+    379.53,
+    342.26,
+    372.8,
+    393,
+    363.27,
+    403.32,
+    407.46,
+    395.83,
+    372.54,
+    376.94,
+    378.55,
+    372.65,
+    401.21,
+    388.71,
+    414.1,
+    389.2,
+    387.61,
+    355.28,
+    377.8,
+    383.2,
+    423.95,
+    381.72,
+    370.05,
+    402.4,
+    369.62,
+    389.29,
+    396.97,
+    393.31,
+    372.18,
+    350.07,
+    323.79,
+    317.24,
+    361.95,
+    331.19,
+    344.99,
+    336.84,
+    276.7,
+    342.52,
+    322.13,
+    328.09,
+    506.67,
+    503.26,
+    495.8,
+    512.71,
+    444.36,
+    389.62,
+    621.79,
+    506.55,
+    493.56,
+    466.74,
+    445.05,
+    435.54,
+    499.57,
+    513.19,
+    552.25,
+    504.41,
+    522.22,
+    399.02,
+    451.95,
+    393.2,
+    466.11,
+    476.45,
+    438.43,
+    452.25,
+    409.82,
+    372.61,
+    362.97,
+    520.18,
+    406.06
+   ],
+   "impr": [
+    13049,
+    17571,
+    17745,
+    16483,
+    14647,
+    15272,
+    15358,
+    17131,
+    17689,
+    16101,
+    19036,
+    13941,
+    13738,
+    14393,
+    15702,
+    16601,
+    16340,
+    16201,
+    13524,
+    13566,
+    14411,
+    15590,
+    15601,
+    15720,
+    13943,
+    14359,
+    13478,
+    14587,
+    16058,
+    13043,
+    16091,
+    22976,
+    15436,
+    13706,
+    12512,
+    13447,
+    12118,
+    11833,
+    11916,
+    11959,
+    15239,
+    10843,
+    11909,
+    13396,
+    13621,
+    14352,
+    12342,
+    12090,
+    9501,
+    11371,
+    13614,
+    14075,
+    13825,
+    19662,
+    18616,
+    26079,
+    24367,
+    22950,
+    30676,
+    26978,
+    28342,
+    25272,
+    16671,
+    52474,
+    47178,
+    59306,
+    73195,
+    59779,
+    57532,
+    49904,
+    53329,
+    62921,
+    55726,
+    62651,
+    56368,
+    55582,
+    54650,
+    55137,
+    50034,
+    49527,
+    59616,
+    49649,
+    52970,
+    48584,
+    47864,
+    44584,
+    52525,
+    52315,
+    54329,
+    46898,
+    49582,
+    53709,
+    48471,
+    53320,
+    53616,
+    52859,
+    48272,
+    39952,
+    37702,
+    40896,
+    49318,
+    46817,
+    48176,
+    43623,
+    32907,
+    40802,
+    37204,
+    38569,
+    64704,
+    60481,
+    60844,
+    57086,
+    49444,
+    46120,
+    81561,
+    69378,
+    60910,
+    48686,
+    46144,
+    49449,
+    62470,
+    68272,
+    76303,
+    70591,
+    69782,
+    56143,
+    59741,
+    40229,
+    61635,
+    59363,
+    56796,
+    53309,
+    44310,
+    39356,
+    40083,
+    53236,
+    38842
+   ],
+   "clicks": [
+    165,
+    219,
+    247,
+    246,
+    155,
+    147,
+    218,
+    240,
+    201,
+    205,
+    173,
+    123,
+    188,
+    180,
+    225,
+    281,
+    261,
+    171,
+    166,
+    147,
+    195,
+    185,
+    219,
+    175,
+    175,
+    158,
+    137,
+    199,
+    173,
+    155,
+    197,
+    251,
+    191,
+    162,
+    100,
+    154,
+    219,
+    308,
+    160,
+    94,
+    199,
+    138,
+    129,
+    152,
+    172,
+    130,
+    133,
+    157,
+    110,
+    109,
+    167,
+    160,
+    140,
+    125,
+    151,
+    239,
+    243,
+    256,
+    276,
+    268,
+    239,
+    254,
+    140,
+    318,
+    406,
+    503,
+    427,
+    452,
+    422,
+    441,
+    476,
+    504,
+    487,
+    496,
+    468,
+    390,
+    455,
+    440,
+    473,
+    411,
+    418,
+    410,
+    418,
+    426,
+    407,
+    418,
+    479,
+    408,
+    392,
+    379,
+    396,
+    459,
+    440,
+    473,
+    387,
+    418,
+    422,
+    356,
+    346,
+    394,
+    502,
+    401,
+    314,
+    380,
+    305,
+    399,
+    388,
+    386,
+    490,
+    492,
+    476,
+    523,
+    612,
+    538,
+    992,
+    665,
+    582,
+    595,
+    558,
+    577,
+    666,
+    668,
+    639,
+    733,
+    732,
+    534,
+    548,
+    461,
+    687,
+    615,
+    589,
+    582,
+    496,
+    422,
+    472,
+    600,
+    471
+   ]
+  },
+  "tiktok": {
+   "cost": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    20.37,
+    21.63,
+    20.51,
+    19.03,
+    20.88,
+    17.58,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    27.08,
+    33.81,
+    20.86,
+    33.28,
+    33.56,
+    29.43,
+    21.98,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    43.03,
+    46.56,
+    45.64,
+    44.34,
+    43.42,
+    40.93,
+    36.08,
+    33.58,
+    47.94,
+    46.17,
+    45.94,
+    44.86,
+    42.76,
+    38.75,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    32.27,
+    46.3,
+    47.23,
+    46.68,
+    45.02,
+    44.39,
+    38.11,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    41.47,
+    43.59,
+    43.77,
+    45.31,
+    42.28,
+    42.21,
+    41.36,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    44.73,
+    105.65,
+    105.82,
+    105.96,
+    106.94,
+    103.94,
+    104.57,
+    127.98,
+    103.61,
+    104.79,
+    104.9,
+    106.77,
+    103.07,
+    106.02
+   ],
+   "impr": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    8482,
+    14907,
+    13222,
+    8716,
+    7777,
+    7882,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    2777,
+    5387,
+    8880,
+    9731,
+    8821,
+    9249,
+    6370,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    39899,
+    39011,
+    41784,
+    40555,
+    34724,
+    32288,
+    31492,
+    36620,
+    45546,
+    46290,
+    47490,
+    44696,
+    39022,
+    34357,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    31472,
+    39177,
+    41035,
+    42328,
+    41544,
+    35641,
+    30034,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    45570,
+    36448,
+    35204,
+    34412,
+    35684,
+    40715,
+    33937,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    68694,
+    103645,
+    85068,
+    78436,
+    83788,
+    75068,
+    71216,
+    114016,
+    89849,
+    84110,
+    82411,
+    84951,
+    80003,
+    77269
+   ],
+   "clicks": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    969,
+    1091,
+    998,
+    880,
+    919,
+    742,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    739,
+    1596,
+    824,
+    1589,
+    1508,
+    1456,
+    1074,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    55,
+    52,
+    60,
+    50,
+    52,
+    43,
+    56,
+    36,
+    71,
+    63,
+    72,
+    76,
+    74,
+    47,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    39,
+    65,
+    69,
+    43,
+    62,
+    48,
+    42,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    63,
+    40,
+    41,
+    45,
+    61,
+    51,
+    60,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    67,
+    111,
+    89,
+    110,
+    113,
+    115,
+    118,
+    144,
+    113,
+    119,
+    129,
+    125,
+    113,
+    120
+   ]
+  }
+ }
+}</script>
+<script>
+(function(){
+  const raw = JSON.parse(document.getElementById('dr-data').textContent);
+  const CHANS = [['search','Search'],['pmax','PMax'],['meta','Meta'],['tiktok','TikTok']];
+  const presetEl = document.getElementById('dr-preset'), fromEl = document.getElementById('dr-from'), toEl = document.getElementById('dr-to');
+  const minD = raw.dates[0], maxD = raw.dates[raw.dates.length - 1];
+  const fmtMoney = v => '$'+v.toLocaleString(undefined,{maximumFractionDigits:0});
+  const fmtNum = v => Math.round(v).toLocaleString();
+  function render() {
+    const from = fromEl.value, to = toEl.value;
+    const idxs = raw.dates.map((d,i)=>i).filter(i => raw.dates[i] >= from && raw.dates[i] <= to);
+    let rows = CHANS.map(([key,label]) => {
+      let cost=0, impr=0, clicks=0;
+      idxs.forEach(i => { cost += raw.channels[key].cost[i]||0; impr += raw.channels[key].impr[i]||0; clicks += raw.channels[key].clicks[i]||0; });
+      const ctr = impr ? clicks/impr : 0, cpc = clicks ? cost/clicks : 0;
+      return `<tr><td>${label}</td><td class='r'>${fmtMoney(cost)}</td><td class='r'>${fmtNum(impr)}</td><td class='r'>${fmtNum(clicks)}</td><td class='r'>${(ctr*100).toFixed(2)}%</td><td class='r'>${cpc?'$'+cpc.toFixed(2):'—'}</td></tr>`;
+    }).join('');
+    const totCost = CHANS.reduce((s,[k])=>s+idxs.reduce((a,i)=>a+(raw.channels[k].cost[i]||0),0),0);
+    document.getElementById('dr-body').innerHTML =
+      (idxs.length ? `<p class='ss'>${idxs.length} days · total spend across these 4 channels ${fmtMoney(totCost)}</p>`
+        + `<table><tr><th>Channel</th><th class='r'>Spend</th><th class='r'>Impressions</th><th class='r'>Clicks</th><th class='r'>CTR</th><th class='r'>CPC</th></tr>${rows}</table>`
+       : `<p class='ss'>No days in range — pick dates between ${minD} and ${maxD}.</p>`);
+  }
+  function applyPreset() {
+    const v = presetEl.value;
+    if (v === 'custom') return;
+    if (v === 'all') { fromEl.value = minD; toEl.value = maxD; }
+    else {
+      const days = parseInt(v, 10);
+      const end = new Date(maxD + 'T00:00:00Z');
+      const start = new Date(end); start.setUTCDate(start.getUTCDate() - (days - 1));
+      const startStr = start.toISOString().slice(0, 10);
+      fromEl.value = startStr < minD ? minD : startStr;
+      toEl.value = maxD;
+    }
+    render();
+  }
+  presetEl.addEventListener('change', applyPreset);
+  [fromEl, toEl].forEach(el => el.addEventListener('change', () => { presetEl.value = 'custom'; render(); }));
+  render();
+})();
+</script>
+  <h2 class='sect'>Historical months</h2>
+<select id='hist-select'></select>
+<div id='hist-body'></div>
+<script id='hist-data' type='application/json'>[
+ {
+  "ym": "2025|08",
+  "label": "Aug 2025",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 47531.58,
+    "sessions": 56767.0,
+    "conv": 431.7,
+    "cvr": 0.0076,
+    "cpa": 110.1
+   },
+   {
+    "name": "Meta",
+    "spend": 21366.76,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "TikTok",
+    "spend": 276.32,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 69174.66,
+   "conv": 431.7,
+   "cpa": 160.23,
+   "ga4_sessions_all": 124864.0,
+   "servco": 1520.0,
+   "ratio": 0.2894
+  }
+ },
+ {
+  "ym": "2025|09",
+  "label": "Sep 2025",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 62644.72,
+    "sessions": 38854.0,
+    "conv": 729.2,
+    "cvr": 0.0188,
+    "cpa": 85.91
+   },
+   {
+    "name": "Meta",
+    "spend": 2115.23,
+    "sessions": 12815.0,
+    "conv": 6.3,
+    "cvr": 0.0005,
+    "cpa": 336.48
+   },
+   {
+    "name": "TikTok",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 64759.95,
+   "conv": 735.5,
+   "cpa": 88.05,
+   "ga4_sessions_all": 112032.0,
+   "servco": 2380.0,
+   "ratio": 0.3143
+  }
+ },
+ {
+  "ym": "2025|10",
+  "label": "Oct 2025",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 70178.52,
+    "sessions": 30325.0,
+    "conv": 862.0,
+    "cvr": 0.0284,
+    "cpa": 81.41
+   },
+   {
+    "name": "Meta",
+    "spend": 8896.55,
+    "sessions": 10509.0,
+    "conv": 12.6,
+    "cvr": 0.0012,
+    "cpa": 703.44
+   },
+   {
+    "name": "TikTok",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 79075.07,
+   "conv": 874.7,
+   "cpa": 90.41,
+   "ga4_sessions_all": 111143.0,
+   "servco": 2808.0,
+   "ratio": 0.3328
+  }
+ },
+ {
+  "ym": "2025|11",
+  "label": "Nov 2025",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 74876.46,
+    "sessions": 31706.0,
+    "conv": 728.1,
+    "cvr": 0.023,
+    "cpa": 102.84
+   },
+   {
+    "name": "Meta",
+    "spend": 8210.54,
+    "sessions": 12061.0,
+    "conv": 6.1,
+    "cvr": 0.0005,
+    "cpa": 1352.04
+   },
+   {
+    "name": "TikTok",
+    "spend": 130.01,
+    "sessions": 208.0,
+    "conv": 0.0,
+    "cvr": 0.0,
+    "cpa": null
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 83217.01,
+   "conv": 734.2,
+   "cpa": 113.34,
+   "ga4_sessions_all": 117907.0,
+   "servco": 2505.0,
+   "ratio": 0.3036
+  }
+ },
+ {
+  "ym": "2025|12",
+  "label": "Dec 2025",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 75080.18,
+    "sessions": 34650.0,
+    "conv": 745.2,
+    "cvr": 0.0215,
+    "cpa": 100.76
+   },
+   {
+    "name": "Meta",
+    "spend": 16346.86,
+    "sessions": 8142.0,
+    "conv": 6.3,
+    "cvr": 0.0008,
+    "cpa": 2610.51
+   },
+   {
+    "name": "TikTok",
+    "spend": 8301.02,
+    "sessions": 13381.0,
+    "conv": 0.0,
+    "cvr": 0.0,
+    "cpa": null
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 99728.06,
+   "conv": 751.4,
+   "cpa": 132.72,
+   "ga4_sessions_all": 134278.0,
+   "servco": 2673.0,
+   "ratio": 0.2846
+  }
+ },
+ {
+  "ym": "2026|01",
+  "label": "Jan 2026",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 51955.53,
+    "sessions": 23416.0,
+    "conv": 814.2,
+    "cvr": 0.0348,
+    "cpa": 63.81
+   },
+   {
+    "name": "Meta",
+    "spend": 8722.63,
+    "sessions": 7712.0,
+    "conv": 9.2,
+    "cvr": 0.0012,
+    "cpa": 945.08
+   },
+   {
+    "name": "TikTok",
+    "spend": 13944.32,
+    "sessions": 15855.0,
+    "conv": 0.0,
+    "cvr": 0.0,
+    "cpa": null
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 74622.48,
+   "conv": 823.4,
+   "cpa": 90.63,
+   "ga4_sessions_all": 120981.0,
+   "servco": 3081.0,
+   "ratio": 0.3296
+  }
+ },
+ {
+  "ym": "2026|02",
+  "label": "Feb 2026",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 55812.68,
+    "sessions": 26091.0,
+    "conv": 1013.4,
+    "cvr": 0.0388,
+    "cpa": 55.07
+   },
+   {
+    "name": "Meta",
+    "spend": 6693.61,
+    "sessions": 6887.0,
+    "conv": 6.0,
+    "cvr": 0.0009,
+    "cpa": 1121.71
+   },
+   {
+    "name": "TikTok",
+    "spend": 13994.04,
+    "sessions": 42002.0,
+    "conv": 2.7,
+    "cvr": 0.0001,
+    "cpa": 5276.51
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 76500.33,
+   "conv": 1022.1,
+   "cpa": 74.85,
+   "ga4_sessions_all": 148632.0,
+   "servco": 2860.0,
+   "ratio": 0.3315
+  }
+ },
+ {
+  "ym": "2026|03",
+  "label": "Mar 2026",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 56350.38,
+    "sessions": 27701.0,
+    "conv": 703.4,
+    "cvr": 0.0254,
+    "cpa": 80.11
+   },
+   {
+    "name": "Meta",
+    "spend": 7604.67,
+    "sessions": 8373.0,
+    "conv": 5.4,
+    "cvr": 0.0006,
+    "cpa": 1413.21
+   },
+   {
+    "name": "TikTok",
+    "spend": 1133.28,
+    "sessions": 33798.0,
+    "conv": 0.5,
+    "cvr": 0.0,
+    "cpa": 2211.33
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 65088.33,
+   "conv": 709.3,
+   "cpa": 91.77,
+   "ga4_sessions_all": 135004.0,
+   "servco": 2339.0,
+   "ratio": 0.2562
+  }
+ },
+ {
+  "ym": "2026|04",
+  "label": "Apr 2026",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 57201.65,
+    "sessions": 27195.0,
+    "conv": 526.5,
+    "cvr": 0.0194,
+    "cpa": 108.64
+   },
+   {
+    "name": "Meta",
+    "spend": 6183.14,
+    "sessions": 7293.0,
+    "conv": 6.5,
+    "cvr": 0.0009,
+    "cpa": 953.62
+   },
+   {
+    "name": "TikTok",
+    "spend": 2462.66,
+    "sessions": 28324.0,
+    "conv": 1.3,
+    "cvr": 0.0,
+    "cpa": 1835.76
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 65847.45,
+   "conv": 534.4,
+   "cpa": 123.23,
+   "ga4_sessions_all": 119123.0,
+   "servco": 1754.0,
+   "ratio": 0.2236
+  }
+ },
+ {
+  "ym": "2026|05",
+  "label": "May 2026",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 51591.65,
+    "sessions": 26391.0,
+    "conv": 405.2,
+    "cvr": 0.0154,
+    "cpa": 127.34
+   },
+   {
+    "name": "Meta",
+    "spend": 3281.33,
+    "sessions": 5592.0,
+    "conv": 1.4,
+    "cvr": 0.0002,
+    "cpa": 2380.07
+   },
+   {
+    "name": "TikTok",
+    "spend": 1656.95,
+    "sessions": 17594.0,
+    "conv": 0.0,
+    "cvr": 0.0,
+    "cpa": null
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 56529.93,
+   "conv": 406.5,
+   "cpa": 139.05,
+   "ga4_sessions_all": 112872.0,
+   "servco": 1490.0,
+   "ratio": 0.1723
+  }
+ },
+ {
+  "ym": "2026|06",
+  "label": "Jun 2026",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 56574.44,
+    "sessions": 28033.0,
+    "conv": 570.1,
+    "cvr": 0.0203,
+    "cpa": 99.24
+   },
+   {
+    "name": "Meta",
+    "spend": 3758.67,
+    "sessions": 4992.0,
+    "conv": 3.9,
+    "cvr": 0.0008,
+    "cpa": 969.6
+   },
+   {
+    "name": "TikTok",
+    "spend": 2327.89,
+    "sessions": 6859.0,
+    "conv": 0.2,
+    "cvr": 0.0,
+    "cpa": 10208.71
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 231.0,
+    "conv": 0.0,
+    "cvr": 0.0,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 62661.0,
+   "conv": 574.2,
+   "cpa": 109.13,
+   "ga4_sessions_all": 95858.0,
+   "servco": 1780.0,
+   "ratio": 0.228
+  }
+ },
+ {
+  "ym": "2026|07",
+  "label": "Jul 2026",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 62469.39,
+    "sessions": 32278.0,
+    "conv": 727.9,
+    "cvr": 0.0226,
+    "cpa": 85.82
+   },
+   {
+    "name": "Meta",
+    "spend": 11412.24,
+    "sessions": 12229.0,
+    "conv": 12.7,
+    "cvr": 0.001,
+    "cpa": 899.37
+   },
+   {
+    "name": "TikTok",
+    "spend": 6238.31,
+    "sessions": 8781.0,
+    "conv": 1.0,
+    "cvr": 0.0001,
+    "cpa": 6391.14
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 0.0,
+    "sessions": 458.0,
+    "conv": 3.4,
+    "cvr": 0.0075,
+    "cpa": 0.0
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 172.0,
+    "conv": 0.0,
+    "cvr": 0.0,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 0.0,
+    "conv": 0.0,
+    "cvr": null,
+    "cpa": null
+   }
+  ],
+  "totals": {
+   "spend": 80119.94,
+   "conv": 745.0,
+   "cpa": 107.54,
+   "ga4_sessions_all": 110406.0,
+   "servco": 2092.0,
+   "ratio": 0.244
+  }
+ },
+ {
+  "ym": "2026|08",
+  "label": "Aug 2026",
+  "channels": [
+   {
+    "name": "Google (Search + PMax)",
+    "spend": 63086.53,
+    "sessions": 24592.0,
+    "conv": 1199.1,
+    "cvr": 0.0488,
+    "cpa": 52.61
+   },
+   {
+    "name": "Meta",
+    "spend": 12943.54,
+    "sessions": 15335.0,
+    "conv": 21.5,
+    "cvr": 0.0014,
+    "cpa": 600.73
+   },
+   {
+    "name": "TikTok",
+    "spend": 5461.56,
+    "sessions": 7811.0,
+    "conv": 1.0,
+    "cvr": 0.0001,
+    "cpa": 5449.83
+   },
+   {
+    "name": "ChatGPT Ads",
+    "spend": 2013.67,
+    "sessions": 534.0,
+    "conv": 1.0,
+    "cvr": 0.0019,
+    "cpa": 2009.34
+   },
+   {
+    "name": "Twitch",
+    "spend": 0.0,
+    "sessions": 63.0,
+    "conv": 0.0,
+    "cvr": 0.0,
+    "cpa": null
+   },
+   {
+    "name": "Demand Gen",
+    "spend": 0.0,
+    "sessions": 4927.0,
+    "conv": 4.0,
+    "cvr": 0.0008,
+    "cpa": 0.0
+   }
+  ],
+  "totals": {
+   "spend": 83505.3,
+   "conv": 1226.6,
+   "cpa": 68.08,
+   "ga4_sessions_all": 79254.0,
+   "servco": 2095.0,
+   "ratio": 0.5011
+  }
+ }
+]</script>
+<script>
+(function(){
+  const months = JSON.parse(document.getElementById('hist-data').textContent);
+  const sel = document.getElementById('hist-select');
+  months.forEach((m,i) => { const o=document.createElement('option'); o.value=i; o.textContent=m.label; sel.appendChild(o); });
+  const fmtMoney = v => v==null ? '—' : '$'+v.toLocaleString(undefined,{maximumFractionDigits:0});
+  const fmtNum = v => v==null ? '—' : Math.round(v).toLocaleString();
+  const fmtPct = v => v==null ? '—' : (v*100).toFixed(2)+'%';
+  function render(i) {
+    const m = months[i];
+    let rows = m.channels.map(c => `<tr><td>${c.name}</td><td class='r'>${fmtMoney(c.spend)}</td><td class='r'>${fmtNum(c.sessions)}</td>`
+      + `<td class='r'>${fmtNum(c.conv)}</td><td class='r'>${fmtPct(c.cvr)}</td><td class='r'>${fmtMoney(c.cpa)}</td></tr>`).join('');
+    const t = m.totals;
+    rows += `<tr class='tot'><td>Total</td><td class='r'>${fmtMoney(t.spend)}</td><td class='r'>—</td><td class='r'>${fmtNum(t.conv)}</td><td class='r'>—</td><td class='r'>${fmtMoney(t.cpa)}</td></tr>`;
+    document.getElementById('hist-body').innerHTML =
+      `<p class='ss'>SERVCO gross adds ${fmtNum(t.servco)} · GA4 accuracy ratio ${t.ratio!=null? t.ratio.toFixed(3):'—'} · GA4 sessions, all traffic ${fmtNum(t.ga4_sessions_all)}</p>`
+      + `<table><tr><th>Channel</th><th class='r'>Spend</th><th class='r'>GA4 sessions</th><th class='r'>Custom conv.</th><th class='r'>Conv. rate</th><th class='r'>CPA</th></tr>${rows}</table>`;
+  }
+  sel.addEventListener('change', e => render(e.target.value));
+  sel.value = months.length - 1; render(months.length - 1);
+})();
+</script>
+  <div class='note'><h4>Channel &amp;amp; Source Performance</h4><p>Combined view of Paid media channels and Organic/Direct traffic sources. Search, PMax, Meta, TikTok, ChatGPT Ads at the top (their own platform spend/CPC/CPA), Radio Campaign (offline, prorated spend, no digital tracking so no CPC/sessions/etc.), then Direct/Organic/AI Assistant/Other rolled up from GA4 default channel groups (not GA4's own "Paid *" groups, which miscategorize Twitch/Demand Gen). Other is a residual so every session is accounted for. Run-rate columns compare MTD projected to a full month vs August 2026's actual total. Conv. rate/CPA use GA4 items × accuracy ratio: 0.498 for Sep 1-14 (990 ÷ 1987). Bounce rate and average time on site are GA4-native, not calibrated, MTD-only.</p><h4>Budget Pacing</h4><p>MTD spend through 14 Sep (14 of 30 days). Pace = % spent − % of month elapsed. Budgets from the Inputs sheet. Radio (NZME): Aug-Sept 2026 Module · 31 Aug – 4 Oct 2026 (35 days, 43% elapsed) · 164 spots · target People 25-44. Spend is committed at booking (NZME's cancellation terms apply), not billed daily — 'spend to date' is a straight-line estimate (booked total ÷ flight days × elapsed days), used to fold Radio into Blended Spend/CPA, not a real invoice-to-date. No digital attribution (no UTM/GA4 tracking for it). Ratecard value $66,773 → full value incl. bonus spots $86,454 (65.2% effective discount).</p><h4>Historical Trends &amp; Pacing Trajectory</h4><p>Last 4 months / last 4 weeks, each ending with the current in-progress period. The current month is run-rated to a full month for comparability (labelled RR); the current week is shown as-is, too little data to run-rate reliably (labelled MTD). Historical months/weeks are Kay's own reconciled figures; the current period is computed live from Supermetrics + GA4 + the Inputs sheet, using the same 'Spend (Media+Fees)' definition: Spend (Media+Fees) = platform media spend + Radio (prorated) + agency fees. Fees = $1,500 mgmt + $3,500 SEO (both prorated by elapsed/days-in-period) + 15% commission on media spend. Sourced from the confirmed Aug 2026 agency cost structure. CPC and CPA both use this fully-loaded spend figure (a 'blended' CPC/CPA, not platform-only).</p><h4>Custom Date Range</h4><p>Pick a preset or a custom range within 2026-05-01 – 2026-09-14 (the window we hold daily figures for — see Historical months for anything further back, at monthly grain). Search, PMax, Meta, TikTok only, same coverage caveats as Trends. This is not live — it re-slices the data from the last rebuild, client-side, in your browser; it doesn't re-query Supermetrics on the fly.</p><h4>Historical Months</h4><p>Monthly grain — spend/GA4 further back than the two comparison windows above is only available by calendar month, not by arbitrary date range. Google combines Search + PMax (no monthly split available at this grain). Conversions use that month's own SERVCO ÷ GA4-items accuracy ratio.</p></div>
+</div>
+
+<footer>
+<b>Methodology</b>
+<ul>
+<li><b>Custom conversions</b> = channel GA4 items purchased × accuracy ratio; ratio = SERVCO gross adds ÷ GA4 items purchased across all traffic, computed for the current window. Current: cur: 0.498; cmp: 0.498</li>
+<li><b>Custom conv. rate</b> = custom conversions ÷ channel GA4 sessions. <b>Custom CPA</b> = spend ÷ custom conversions.</li>
+<li><b>vs LM</b> = month-to-date vs the same elapsed days last month, plain % change, no projection. <b>Run-rate</b> = MTD ÷ elapsed days × days in month, compared against August 2026's full-month actual (<b>vs full LM</b>). Rate metrics (CPC, CPM, CTR, VTR, Conv. rate, CPA) only get vs LM — a rate doesn't scale with days elapsed, so run-rating it would just reproduce the same number.</li>
+<li><b>GA4 identifiers</b> (property 405847352): Search = Session campaign starts with "Rocket Mobile_Search"; PMax = contains "Rocket Mobile_Pmax"; Meta = source starts with "facebook", medium "paid-social"; TikTok = "tiktok / paid-social" + "tiktok / consideration-paid-social-cpm"; ChatGPT = "chatgpt_ads / search"; Twitch = source "amazon-twitch"; Demand Gen = "demandgen / intent-cpm".</li>
+<li><b>Platform sources</b>: Google Ads 6066601949 (Supermetrics AW); Meta act_1693880094174879 (FA; platform conversions = custom conversion "OP - Conversion"); TikTok 7538171133322231824 (TIK; plus agency-account months entered manually as tiktok_mbm); ChatGPT Ads, Twitch, Demand Gen = Inputs sheet (manual_channels).</li>
+<li>Platform-reported conversions in campaign tables are directional only. SERVCO is the source of truth for gross adds.</li>
+</ul>
+<div>Built 2026-09-14 · data through 2026-09-14 · currency NZD</div>
+</footer>
+</div>
+<script>
+  (function(){
+    var btn=document.getElementById('themeTog');
+    btn.addEventListener('click',function(){
+      var dark=document.documentElement.getAttribute('data-theme')==='dark';
+      if(dark){document.documentElement.removeAttribute('data-theme');btn.textContent='Dark mode';}
+      else{document.documentElement.setAttribute('data-theme','dark');btn.textContent='Light mode';}
+    });
+  })();
+  document.querySelectorAll('.tb').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('.tb').forEach(function(x){x.classList.remove('active')});
+      document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active')});
+      b.classList.add('active');
+      document.getElementById('view-'+b.dataset.v).classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
