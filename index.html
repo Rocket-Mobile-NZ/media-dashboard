@@ -171,6 +171,19 @@ footer{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.6;
 }
 .dl{white-space:nowrap}
 .kpi{overflow:hidden}
+
+.ccard{border:1px solid var(--bd,#e5e7eb);border-radius:10px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+.cthumb{position:relative;width:100%;aspect-ratio:1/1;background:#f1f1f4;overflow:hidden}
+.cthumb img{width:100%;height:100%;object-fit:cover;display:block}
+.cph{width:100%;height:100%;align-items:center;justify-content:center;font-size:28px;color:#b8bcc4;background:#eef0f3}
+.cplay{position:absolute;bottom:6px;right:6px;background:rgba(0,0,0,.55);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.cbody{padding:10px 12px 12px}
+.cname{font-size:12.5px;font-weight:600;margin:0 0 2px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.ccamp{font-size:11px;color:#8a8f98;margin:0 0 8px}
+.cmetrics{display:flex;flex-wrap:wrap;gap:6px 10px;font-size:11px;color:#5b5f68}
+.cmetrics b{color:#1a1a1a;font-weight:700}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:14px;margin-top:10px}
+.csect-note{font-size:11px;color:#9a9fa8;margin:4px 0 0}
 </style></head>
 <body>
 <div class="wrap">
@@ -244,7 +257,129 @@ footer{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.6;
 <h2 class='sect'>Campaign breakdown</h2>
 <p class='ss'>Platform-reported ("OP - Conversion" custom conversion, 7-day click/1-day view window) &mdash; directional only, broader attribution than SERVCO/GA4.</p>
 <table><tr><th>Campaign</th><th class='r'>Spend</th><th class='r'>Clicks</th><th class='r'>Impressions</th><th class='r'>CPC</th><th class='r'>CTR</th><th class='r'>CPM</th><th class='r'>OP-Conv. (platform)</th><th class='r'>CVR</th><th class='r'>CPA</th></tr><tr><td>Meta - Purchase - BAU</td><td class='r'>$2,261</td><td class='r'>5,518</td><td class='r'>291,581</td><td class='r'>$0.41</td><td class='r stacked'>1.89%<span class='small'><span class='up'>&#9650;18%</span> LW &middot; <span class='up'>&#9650;140%</span> LM</span></td><td class='r stacked'>$7.76<span class='small'><span class='down'>&#9650;43%</span> LW &middot; <span class='up'>&#9660;2%</span> LM</span></td><td class='r'>30.0</td><td class='r stacked'>0.54%<span class='small'><span class='up'>&#9650;18%</span> LW &middot; <span class='down'>&#9660;79%</span> LM</span></td><td class='r stacked'>$75.37<span class='small'><span class='down'>&#9650;3%</span> LW &middot; <span class='down'>&#9650;97%</span> LM</span></td></tr><tr><td>Meta - Landing Page Views - BAU</td><td class='r'>$1,933</td><td class='r'>4,436</td><td class='r'>206,352</td><td class='r'>$0.44</td><td class='r stacked'>2.15%<span class='small'><span class='up'>&#9650;2%</span> LW &middot; <span class='up'>&#9650;33%</span> LM</span></td><td class='r stacked'>$9.37<span class='small'><span class='down'>&#9650;2%</span> LW &middot; <span class='down'>&#9650;15%</span> LM</span></td><td class='r'>1.0</td><td class='r stacked'>0.02%<span class='small'>&mdash; LW &middot; <span class='down'>&#9660;15%</span> LM</span></td><td class='r stacked'>$1,933.24<span class='small'>&mdash; LW &middot; <span class='down'>&#9650;2%</span> LM</span></td></tr><tr><td>Meta - Purchase - Remarketing</td><td class='r'>$1,611</td><td class='r'>1,959</td><td class='r'>131,522</td><td class='r'>$0.82</td><td class='r stacked'>1.49%<span class='small'><span class='up'>&#9650;47%</span> LW &middot; &mdash; LM</span></td><td class='r stacked'>$12.25<span class='small'><span class='down'>&#9650;21%</span> LW &middot; &mdash; LM</span></td><td class='r'>54.0</td><td class='r stacked'>2.76%<span class='small'><span class='up'>&#9650;63%</span> LW &middot; &mdash; LM</span></td><td class='r stacked'>$29.83<span class='small'><span class='up'>&#9660;49%</span> LW &middot; &mdash; LM</span></td></tr><tr><td>Meta - Purchase - Group Plans</td><td class='r'>$794</td><td class='r'>532</td><td class='r'>154,248</td><td class='r'>$1.49</td><td class='r stacked'>0.34%<span class='small'><span class='down'>&#9660;5%</span> LW &middot; &mdash; LM</span></td><td class='r stacked'>$5.15<span class='small'><span class='down'>&#9650;13%</span> LW &middot; &mdash; LM</span></td><td class='r'>11.0</td><td class='r stacked'>2.07%<span class='small'><span class='up'>&#9650;129%</span> LW &middot; &mdash; LM</span></td><td class='r stacked'>$72.22<span class='small'><span class='up'>&#9660;48%</span> LW &middot; &mdash; LM</span></td></tr></table>
-</div>
+<h3 style="margin-top:22px">Top creatives by spend (MTD Sep 1&ndash;15)</h3>
+<div class="cgrid"><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-cdg6-1.xx.fbcdn.net/v/t45.1600-4/719873722_122229798842330178_3398505409464187100_n.png?_nc_cat=106&ccb=1-7&_nc_ohc=sL_lL57NHiEQ7kNvwFSw5Nx&_nc_oc=Adr8RjNOE8ftm2EFp1pj5QyYk_O4NqRscfncny7R_ASEFd8KOXFOiV5ZXprIPUfPyrQ&_nc_zt=1&_nc_ht=scontent-cdg6-1.xx&edm=ALfz3TcEAAAA&_nc_gid=5CFR-JpU-8YYNpMZTi7lpg&_nc_tpa=Q5bMBQI2IFpyBa0b8s3rrbfEvcA7tnZwiSheNekqr0bYkEi6agGZQjyxj2lLZ6-3nXg9VhVF_k9xHB9h&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_AQJNphSSNYIiS0bJJ3eTGJ6IviNy8XmV1RREdY2hlbommQ&oe=6AAD141B' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="June Portin Promo-30 Per Month - Static - 260901">June Portin Promo-30 Per Month - Static - 2...</p>
+    <p class="ccamp">Meta - Purchase - BAU</p>
+    <div class="cmetrics">
+      <span><b>$1,633</b> spend</span>
+      <span><b>3,972</b> clicks</span>
+      <span><b>1.83%</b> CTR</span>
+      <span><b>25</b> OP-Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-bru2-1.xx.fbcdn.net/v/t15.5256-10/669713038_818841797385562_5835900840717634801_n.jpg?_nc_cat=102&ccb=1-7&_nc_ohc=azRFY9ATmZMQ7kNvwH41gPZ&_nc_oc=Adr8_vNuylaagIUr1-NN7cd1l2E8Ig1A6gZK4Jsicf1dm58lR4C0pZ00abvijwIWffo&_nc_zt=23&_nc_ht=scontent-bru2-1.xx&edm=ALfz3TcEAAAA&_nc_gid=2smAqI0LyfnI14oHgFaVtw&_nc_tpa=Q5bMBQLIUlHFU5-AaZXcSs6nA2Di2NUgKHFF-oB1ym0fEIbwFg9nG0LzWZAbX_Kz1If9hgaVnodZxD83&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=4c1fc5&_nc_sid=58080a&oh=00_AQLRCZCC6_Qvy32Kfc7hnyYkaMQ9jOJHoq5SI5nECzA8_Q&oe=6AAD038E' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="Prospecting | AKL 18-44 - Video - Apr 2026_Search Engine">Prospecting | AKL 18-44 - Video - Apr 2026_...</p>
+    <p class="ccamp">Meta - Landing Page Views - BAU</p>
+    <div class="cmetrics">
+      <span><b>$765</b> spend</span>
+      <span><b>1,616</b> clicks</span>
+      <span><b>1.91%</b> CTR</span>
+      <span><b>0</b> OP-Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-cdg4-3.xx.fbcdn.net/v/t45.1600-4/751496353_122234616134330178_8433466040274082343_n.png?_nc_cat=110&ccb=1-7&_nc_ohc=9Pt0NI7BHmgQ7kNvwEGOngY&_nc_oc=AdpvG4j5V8xHnMVs0ns5CGaOJ2AOBoHHVnNcJPbQ-jE_HCphQJSC8HF9Fc1ww2aGC5w&_nc_zt=1&_nc_ht=scontent-cdg4-3.xx&edm=ALfz3TcEAAAA&_nc_gid=3PIvShfkEqrVN4ZY2Obk0A&_nc_tpa=Q5bMBQLqP0_5l2ppjB1E_Uq9pfm36KZorTGN97VaWl5-JLPjfUGfDrMNS3NSkcLL9JIJg0yCZk7ozXFY&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_AQID0BKiRBNGpmQB2cOekWp0W11F_oywG0fkfKVyzhdzdA&oe=6AAD1D46' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="Group Plans Jul 2026-Discount Spreader v2-Rosie - Static - 260901">Group Plans Jul 2026-Discount Spreader v2-R...</p>
+    <p class="ccamp">Meta - Purchase - Group Plans</p>
+    <div class="cmetrics">
+      <span><b>$439</b> spend</span>
+      <span><b>280</b> clicks</span>
+      <span><b>0.34%</b> CTR</span>
+      <span><b>9</b> OP-Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-cdg4-3.xx.fbcdn.net/v/t45.1600-4/794032945_122240395964330178_5622998105437320957_n.png?_nc_cat=110&ccb=1-7&_nc_ohc=cGRyOJNB_1sQ7kNvwFd8gW-&_nc_oc=AdqNK0TP50i8XPSh44FYVwH2-VD0jPDI3D6vnALt6m4r76gi5iNHvNLpQmJpLLhGZEU&_nc_zt=1&_nc_ht=scontent-cdg4-3.xx&edm=ALfz3TcEAAAA&_nc_gid=OWOcy2iZVVYGTp_hYHux-w&_nc_tpa=Q5bMBQJaW0lHlC8ufBsi88RAFyax-b2DhIw8Id8sCEmY2iDe69NGiOD8IDjklwGOAyV1iSR1IvcK9tWw&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_AQKMEFhwdLbYYJ-L9xxXFdfPvalhaiGKzSXH15cN41ZveA&oe=6AAD12C2' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="June Portin Promo-30 Per Month Sep Refresh - Static - 260903">June Portin Promo-30 Per Month Sep Refresh ...</p>
+    <p class="ccamp">Meta - Purchase - Remarketing</p>
+    <div class="cmetrics">
+      <span><b>$427</b> spend</span>
+      <span><b>441</b> clicks</span>
+      <span><b>1.15%</b> CTR</span>
+      <span><b>7</b> OP-Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-bru2-1.xx.fbcdn.net/v/t15.5256-10/780266717_884465101158787_4469969110766478938_n.jpg?_nc_cat=105&ccb=1-7&_nc_ohc=RePjbtm1CjMQ7kNvwGbvE9z&_nc_oc=Ado9xaJLoyqBCHnVJvuC-wtbtGHqIKdDjE_5x-sPfScPWX2eitXk0wORhEOElz1163c&_nc_zt=23&_nc_ht=scontent-bru2-1.xx&edm=ALfz3TcEAAAA&_nc_gid=A1Gbv7s1e4PeNrGqLSFrcw&_nc_tpa=Q5bMBQI0tRyaMzfzXLON7iUoogCAcVyo2TLiaMwhQgupYNAqnKVCnxB3Mrnya8ucJMBwbNVEEwarKull&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=5fad0e&_nc_sid=58080a&oh=00_AQKsVIDAQuIfZbAIg_IHIAskf92vi7MOIb47zyHsKjiBig&oe=6AACECBB' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="Sass-Hook5 - Video - 260824">Sass-Hook5 - Video - 260824</p>
+    <p class="ccamp">Meta - Landing Page Views - BAU</p>
+    <div class="cmetrics">
+      <span><b>$422</b> spend</span>
+      <span><b>1,036</b> clicks</span>
+      <span><b>2.15%</b> CTR</span>
+      <span><b>0</b> OP-Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-bru2-1.xx.fbcdn.net/v/t15.5256-10/795471456_1814212550026483_6295308723582692583_n.jpg?_nc_cat=101&ccb=1-7&_nc_ohc=48DmzB-ILuEQ7kNvwGXN6MN&_nc_oc=AdpoXkOrm5-DAtMwqK_JTqxPr7akGDBSTASTCuPnN3eZNRaKYyZzq5kK8cWTJ5yMbdY&_nc_zt=23&_nc_ht=scontent-bru2-1.xx&edm=ALfz3TcEAAAA&_nc_gid=sY4osFm5z597ReKgMQm1Ew&_nc_tpa=Q5bMBQIEXyw_lTN6FpfA1Ijc7xe9_P0w-X8TTW7R1kCXYq-o0ZsSYJbTrsWdmT-yIg38dmkNdS8d5VMl&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=5fad0e&_nc_sid=58080a&oh=00_AQJjYeXZzrFvSMrB4UH0tw16a67vPfejqLdEQUgQcEU2aA&oe=6AACEF2F' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="Sass-Hook6 - Video - 260904">Sass-Hook6 - Video - 260904</p>
+    <p class="ccamp">Meta - Landing Page Views - BAU</p>
+    <div class="cmetrics">
+      <span><b>$338</b> spend</span>
+      <span><b>735</b> clicks</span>
+      <span><b>2.21%</b> CTR</span>
+      <span><b>0</b> OP-Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-bru2-1.xx.fbcdn.net/v/t45.1600-4/719873722_122229798842330178_3398505409464187100_n.png?_nc_cat=106&ccb=1-7&_nc_ohc=sL_lL57NHiEQ7kNvwEMD8cL&_nc_oc=AdrIubg6UByzK3oNJz59763J9WXuGKZFlBxMQRMLcIGUQMw-M0go-JV5FCYLxnJ4ZwY&_nc_zt=1&_nc_ht=scontent-bru2-1.xx&edm=ALfz3TcEAAAA&_nc_gid=5iwZ3mRuwI6stgr_p-x7aw&_nc_tpa=Q5bMBQKGc1V6rOF2ecybYvvLLlOtHrmCPUpExsDKXwJy3UzLBnpF6XnxaMlshgPsq41dTtWHXOtuOjEw&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_AQLdE0lXt1nMQzRU4-aLz0ryEqj_XpohZdT32cEvZc1H5Q&oe=6AAD141B' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="June Portin Promo-30 Per Month - Static - 260901">June Portin Promo-30 Per Month - Static - 2...</p>
+    <p class="ccamp">Meta - Purchase - Remarketing</p>
+    <div class="cmetrics">
+      <span><b>$291</b> spend</span>
+      <span><b>317</b> clicks</span>
+      <span><b>1.09%</b> CTR</span>
+      <span><b>10</b> OP-Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-bru2-1.xx.fbcdn.net/v/t45.1600-4/802007796_122241117680330178_3889549691769777324_n.png?_nc_cat=104&ccb=1-7&_nc_ohc=BiPUJEL9F5sQ7kNvwGIctSV&_nc_oc=Adr2qmUiv2HrLfK43t46H44S7gltfxfa6GRr5sL_P97HqOamQYHKWiLC6qgxIggm04c&_nc_zt=1&_nc_ht=scontent-bru2-1.xx&edm=ALfz3TcEAAAA&_nc_gid=vXNm6MK1NyA-Cu1cxtO3aA&_nc_tpa=Q5bMBQLjHhQrW39vwgRY6haL8CVfNuayASs1gHsu9nE8g3Luytj49cw-DlgUOPR7lXwk90hYonLBSvEZ&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=52f3c4&_nc_sid=58080a&oh=00_AQJFtprYzbiykaj7YCjLdcivZbA_ylVZtxnvAwySOr3lew&oe=6AB05BAB' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="June Portin Promo-Save 60 Sep Refresh - Static - 260909">June Portin Promo-Save 60 Sep Refresh - Sta...</p>
+    <p class="ccamp">Meta - Purchase - Remarketing</p>
+    <div class="cmetrics">
+      <span><b>$232</b> spend</span>
+      <span><b>195</b> clicks</span>
+      <span><b>0.98%</b> CTR</span>
+      <span><b>15</b> OP-Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-bru2-1.xx.fbcdn.net/v/t15.5256-10/678302870_965231179708216_1627232128754017290_n.jpg?_nc_cat=109&ccb=1-7&_nc_ohc=aHkG18dacK0Q7kNvwE-hlqB&_nc_oc=AdqR8iFVvC9_B2Qh5vty8YBrI-6JxumuzuwDkvapnlLKUNzwiCfnVD6BsPY85zab_d4&_nc_zt=23&_nc_ht=scontent-bru2-1.xx&edm=ALfz3TcEAAAA&_nc_gid=8b5y9d1QxalftQ9EL7eBbw&_nc_tpa=Q5bMBQKfHh71js4zNKHEO9SZ3Y7h0PbTQL44o_g3Xe-FmQ5vtRoQLZR09aL43Q53tVnhK7oOr-STCspm&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=5fad0e&_nc_sid=58080a&oh=00_AQKNmVH8i5ld1hdpepe30Drj-Gj9Qt9y3thwnq2KmOG_pQ&oe=6AAD0977' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="Prospecting | AKL 18-44 - Video - Why RM - v1">Prospecting | AKL 18-44 - Video - Why RM - v1</p>
+    <p class="ccamp">Meta - Landing Page Views - BAU</p>
+    <div class="cmetrics">
+      <span><b>$226</b> spend</span>
+      <span><b>573</b> clicks</span>
+      <span><b>2.29%</b> CTR</span>
+      <span><b>1</b> OP-Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='https://scontent-cdg6-1.xx.fbcdn.net/v/t15.5256-10/780266717_884465101158787_4469969110766478938_n.jpg?_nc_cat=105&ccb=1-7&_nc_ohc=RePjbtm1CjMQ7kNvwGHO6ax&_nc_oc=AdpDMTiZJIlPan96B6nf6GFl2WtaG5t_eu6CZ5Vzs6DqeK8OpY51vMwSfATK1Vp1lDE&_nc_zt=23&_nc_ht=scontent-cdg6-1.xx&edm=ALfz3TcEAAAA&_nc_gid=EJZWFp0wrdiGtNuFbUp4QA&_nc_tpa=Q5bMBQIZJSphiiVOeMlssc9de8hboIoBXsD3dbntVRMdx_wJ0lQZ4B8KKk4C3q5-7s_l4ZhpGPxtYKXE&stp=c0.5000x0.5000f_dst-emg0_p64x64_q75_tt6&ur=5fad0e&_nc_sid=58080a&oh=00_AQJQgG2nuzmImdgYszkXJPhhblUDKdHEHK-Sr9f3-tgXqg&oe=6AACECBB' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#128247;</div></div>
+  <div class="cbody">
+    <p class="cname" title="June Portin Promo-Hook 5 - Vertical Video - 260901">June Portin Promo-Hook 5 - Vertical Video -...</p>
+    <p class="ccamp">Meta - Purchase - Remarketing</p>
+    <div class="cmetrics">
+      <span><b>$211</b> spend</span>
+      <span><b>404</b> clicks</span>
+      <span><b>2.99%</b> CTR</span>
+      <span><b>8</b> OP-Conv</span>
+    </div>
+  </div>
+</div></div>
+<p class="csect-note">Top 10 ads by spend, OP-Conversion custom conversion (platform-reported). Thumbnails are signed Facebook CDN URLs that expire after a short window &mdash; they may need to be refreshed periodically.</p></div>
 
 <div class="view" id="view-tiktok"><h2 class='sect' style='margin-top:0'>TikTok</h2>
 <p class='ss'>Sep 1-15. Active campaigns only (paused/legacy campaigns with $0 spend omitted).</p>
@@ -253,7 +388,105 @@ footer{margin-top:26px;font-size:11.5px;color:var(--muted);line-height:1.6;
 <h2 class='sect'>Campaign breakdown</h2>
 <p class='ss'>Platform-reported conversions &mdash; directional only.</p>
 <table><tr><th>Campaign</th><th class='r'>Spend</th><th class='r'>Clicks</th><th class='r'>Impressions</th><th class='r'>CPC</th><th class='r'>CTR</th><th class='r'>CPM</th><th class='r'>Conversions (platform)</th></tr><tr><td>TikTok - Reach - BAU</td><td class='r'>$1,553</td><td class='r'>1,723</td><td class='r'>1,291,321</td><td class='r'>$0.90</td><td class='r stacked'>0.13%<span class='small'><span class='up'>&#9650;7%</span> LW &middot; <span class='down'>&#9660;32%</span> LM</span></td><td class='r stacked'>$1.20<span class='small'><span class='up'>&#9660;2%</span> LW &middot; <span class='up'>&#9660;41%</span> LM</span></td><td class='r'>0.0</td></tr></table>
-</div>
+<h3 style="margin-top:22px">Top creatives by spend (MTD Sep 1&ndash;15)</h3>
+<div class="cgrid"><div class="ccard">
+  <div class="cthumb"><img src='http://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oAVkuFBNQDqOlFDOggL8Ab7EIfKmTTBETHQfYD~tplv-noop.image?dr=18692&refresh_token=2053e5f7&x-expires=1789581073&x-signature=ACaAggr1V4sKp4ZpfgrZHNKIF%2BQ%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=623c3a84&idc=my2&VideoID=v10033g50000daao79nog65n4vga4590' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#9654;</div><span class='cplay'>&#9654;</span></div>
+  <div class="cbody">
+    <p class="cname" title="Split V1_KIhAEL86.mov_June Portin Promo-SplitPIP-v1- Video - 260901">Split V1_KIhAEL86.mov_June Portin Promo-Spl...</p>
+    <p class="ccamp">TikTok - Reach - BAU</p>
+    <div class="cmetrics">
+      <span><b>$413</b> spend</span>
+      <span><b>462</b> clicks</span>
+      <span><b>0.14%</b> CTR</span>
+      <span><b>0</b> Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='http://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/o8fAqGr3QAAf1dCZWMAI5fe8qIMtAJLWUrKIAe~tplv-noop.image?dr=18692&refresh_token=d960cb2a&x-expires=1789581087&x-signature=TVRLdVx3%2BdFXNo0m2HmBg3uv8Nc%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=623c3a84&idc=my2&VideoID=v10033g50000daao3rvog65lmkgmveg0' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#9654;</div><span class='cplay'>&#9654;</span></div>
+  <div class="cbody">
+    <p class="cname" title="V3_ Stop being your worst enemy_83SMYhBn.mov_June Portin Promo-Stop being your Worst Enemy - 30sVideo - 260901">V3_ Stop being your worst enemy_83SMYhBn.mo...</p>
+    <p class="ccamp">TikTok - Reach - BAU</p>
+    <div class="cmetrics">
+      <span><b>$341</b> spend</span>
+      <span><b>367</b> clicks</span>
+      <span><b>0.13%</b> CTR</span>
+      <span><b>0</b> Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='http://p19-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oQPYWE2AvkgAFC01AajhYzzU7CVBiipsI9BWT~tplv-noop.image?dr=18692&refresh_token=f24b4900&x-expires=1789581087&x-signature=wdUogR48B4dtt5bQK4Z%2FfGO%2BKVk%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=623c3a84&idc=my2&VideoID=v10033g50000daao2onog65kptffq22g' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#9654;</div><span class='cplay'>&#9654;</span></div>
+  <div class="cbody">
+    <p class="cname" title="V1_ you deserve more than what you accept_y4gSk1NF.mov_June Portin Promo-You Deserve More Than What You Accept - 30sVideo - 260901">V1_ you deserve more than what you accept_y...</p>
+    <p class="ccamp">TikTok - Reach - BAU</p>
+    <div class="cmetrics">
+      <span><b>$330</b> spend</span>
+      <span><b>347</b> clicks</span>
+      <span><b>0.13%</b> CTR</span>
+      <span><b>0</b> Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='http://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/o8JDzOFl4ED3xeAAQv6gfAENqVIxN98BQoDYhB~tplv-noop.image?dr=18692&refresh_token=ef8418e0&x-expires=1789581073&x-signature=rqgDlfzxcFai0D9fudul0j6BXXY%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=623c3a84&idc=my2&VideoID=v10033g50000daao8cfog65u6g7j7ong' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#9654;</div><span class='cplay'>&#9654;</span></div>
+  <div class="cbody">
+    <p class="cname" title="Split V2_xMBC3Zfl.mov_June Portin Promo-SplitPIP-v2- Video - 260901">Split V2_xMBC3Zfl.mov_June Portin Promo-Spl...</p>
+    <p class="ccamp">TikTok - Reach - BAU</p>
+    <div class="cmetrics">
+      <span><b>$160</b> spend</span>
+      <span><b>184</b> clicks</span>
+      <span><b>0.13%</b> CTR</span>
+      <span><b>0</b> Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='http://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/oUgkKkYbXgb1GfaDIVvAS5G1LDeIACyeUgRq08~tplv-noop.image?dr=18692&refresh_token=f0597d2d&x-expires=1789581130&x-signature=J%2FGpVQ1vkYZuSbsr9db%2F%2FTwYhcA%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=623c3a84&idc=my2&VideoID=v10033g50000daanu8fog65tbdlli5sg' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#9654;</div><span class='cplay'>&#9654;</span></div>
+  <div class="cbody">
+    <p class="cname" title="AI_Editor_1788182139734_June Portin Promo-Nobody Likes a Red Flag - 24sVideo - 260901">AI_Editor_1788182139734_June Portin Promo-N...</p>
+    <p class="ccamp">TikTok - Reach - BAU</p>
+    <div class="cmetrics">
+      <span><b>$151</b> spend</span>
+      <span><b>185</b> clicks</span>
+      <span><b>0.15%</b> CTR</span>
+      <span><b>0</b> Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='http://p19-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/osHuEQF46fQ07dbVBBDAIBl1N0qggBmDFYEafa~tplv-noop.image?dr=18692&refresh_token=06475ee0&x-expires=1789581084&x-signature=ApHL8mghpYEr9k76KKsQLnx5UFE%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=623c3a84&idc=my2&VideoID=v10033g50000daao0t7og65qt7rast80' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#9654;</div><span class='cplay'>&#9654;</span></div>
+  <div class="cbody">
+    <p class="cname" title="V3_ Break up season_z31NtrOg.mov_June Portin Promo-Break up Season - 27sVideo - 260901">V3_ Break up season_z31NtrOg.mov_June Porti...</p>
+    <p class="ccamp">TikTok - Reach - BAU</p>
+    <div class="cmetrics">
+      <span><b>$64</b> spend</span>
+      <span><b>71</b> clicks</span>
+      <span><b>0.12%</b> CTR</span>
+      <span><b>0</b> Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='http://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/o4snNe8DqEQDDYB71BpiPariIWBBRkAAMgfHc8~tplv-noop.image?dr=18692&refresh_token=0e9d6dfc&x-expires=1789581075&x-signature=FDwjPKTW2RWcEm1fzxzBdM0YGCE%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=623c3a84&idc=my2&VideoID=v10033g50000dajtb6fog65r8v2o1cu0' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#9654;</div><span class='cplay'>&#9654;</span></div>
+  <div class="cbody">
+    <p class="cname" title="Rocket Mobile - Save your money V2_m6cEYiBb.mp4_Bayley-Save Your Money v2 - Video - 260914">Rocket Mobile - Save your money V2_m6cEYiBb...</p>
+    <p class="ccamp">TikTok - Reach - BAU</p>
+    <div class="cmetrics">
+      <span><b>$40</b> spend</span>
+      <span><b>34</b> clicks</span>
+      <span><b>0.09%</b> CTR</span>
+      <span><b>0</b> Conv</span>
+    </div>
+  </div>
+</div><div class="ccard">
+  <div class="cthumb"><img src='http://p16-common-sign.tiktokcdn.com/tos-alisg-p-0051c001-sg/ocNqFlQqDA89BNZegIF6pqQDXfxTrH9EBDBFPQ~tplv-noop.image?dr=18692&refresh_token=4a927810&x-expires=1789581075&x-signature=5wVCKtkxr5xg3eXcdGFi4StY1oU%3D&t=9276707c&ps=14f1eb3e&shp=9e36835a&shcp=623c3a84&idc=my2&VideoID=v10033g50000dajt85vog65uje6lb9ug' loading='lazy' alt='' onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="cph" style="display:none">&#9654;</div><span class='cplay'>&#9654;</span></div>
+  <div class="cbody">
+    <p class="cname" title="Video_20260819_232112_283_Hook 5_ypNX5FZz.mp4_June Portin Promo-Sass-Hook 5- Video - 260914">Video_20260819_232112_283_Hook 5_ypNX5FZz.m...</p>
+    <p class="ccamp">TikTok - Reach - BAU</p>
+    <div class="cmetrics">
+      <span><b>$17</b> spend</span>
+      <span><b>17</b> clicks</span>
+      <span><b>0.10%</b> CTR</span>
+      <span><b>0</b> Conv</span>
+    </div>
+  </div>
+</div></div>
+<p class="csect-note">Top 8 active ads by spend (remaining ads in the account are legacy/paused with $0 spend, excluded here). Conversions shown are platform-reported. Thumbnails are signed TikTok CDN URLs that expire after a short window &mdash; they may need to be refreshed periodically.</p></div>
 
 <div class="view" id="view-other"><h2 class='sect' style='margin-top:0'>Other &mdash; ChatGPT Ads, Radio, Twitch, Demand Gen</h2>
 <p class='ss'>Sep 1-15. Smaller and offline channels rolled up together. Radio has no digital tracking (prorated booked spend only); Twitch and Demand Gen are currently paused ($0 this month).</p>
