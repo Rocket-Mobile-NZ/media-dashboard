@@ -1,0 +1,21 @@
+name: Assemble dashboard
+on:
+  push:
+    paths:
+      - '.dashboard-chunks/READY'
+permissions:
+  contents: write
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Concatenate chunks into index.html
+        run: cat .dashboard-chunks/part-*.html > index.html
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Assemble dashboard from chunks (automated)" || echo "No changes to commit"
+          git push
