@@ -1,0 +1,16 @@
+{
+  "_comment": "Inputs for build.py. Edit only at month rollover (budgets, plan, targets). build.py never reads these from an LLM-typed number on the page.",
+  "gross_adds_target": 2300,
+  "sessions_target": 62302,
+  "spend_plan": 125000,
+  "seo_fee_monthly": 5000,
+  "commission_pct": 0.15,
+  "commission_ends": "2026-09-01",
+  "cpa_target_override": null,
+  "radio_budget": {"2026-10": 30066},
+  "radio_equal_per_day_months": ["2026-10"],
+  "budgets": {
+    "2026-10": {"search": 62000, "pmax": 8000, "meta": 15000, "tiktok": 5000, "chatgpt": 0, "twitch": 0, "demand_gen": 0}
+  },
+  "manual_mtd": {"twitch": 0, "demand_gen": 0}
+}
