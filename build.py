@@ -94,6 +94,10 @@ class Calc:
         w = self.W(first, self.R)
         return w['radio'] * dim(d) / max(w['n'], 1)
 
+    def month_budget_total(self, d):
+        k = mkey(d)
+        return sum(self.cfg['budgets'][k].values()) + self.cfg['radio_budget'].get(k, 0) + self.cfg['seo_fee_monthly']
+
     def prev_month_cpa(self, d):
         pm = (d.replace(day=1) - dt.timedelta(days=1))
         k = mkey(pm)
@@ -122,8 +126,9 @@ def hero(c):
     target_cpa, tmonth = (c.cfg['cpa_target_override'], None) if c.cfg['cpa_target_override'] else c.prev_month_cpa(R)
     return dict(R=R, el=el, dm=dm, m=m, lm=lm, lw=lw, pw=pw, rr_spend=rr_spend, rr_orders=rr_orders, rr_sess=rr_sess,
                 rr_cpa=rr_spend / rr_orders, radio_rr=radio_rr, seo=seo, target_cpa=target_cpa, pm_last=pm_last,
-                plan=c.cfg['spend_plan'], ga_target=c.cfg['gross_adds_target'], ses_target=c.cfg['sessions_target'],
-                label='%s 1-%d' % (MON[R.month - 1], R.day))
+                plan=c.cfg.get('spend_plan_by_month', {}).get(mkey(R)) or c.month_budget_total(R), ga_target=c.cfg['gross_adds_target'], ses_target=c.cfg['sessions_target'],
+                label='%s 1-%d' % (MON[R.month - 1], R.day) if R.day > 1 else '%s 1' % MON[R.month - 1],
+                lm_label=('%s 1-%d' % (MON[pm_last.month - 1], min(el, pm_last.day))) if min(el, pm_last.day) > 1 else '%s 1' % MON[pm_last.month - 1])
 
 
 # ------------------------------------------------------------------ small renderers
@@ -196,6 +201,30 @@ def r_rsc(c, H):
             "<div class='rr hl'><span class='k'>Radio spend to date</span><span class='v n'>%s</span></div>"
             "<div class='rr hl'><span class='k'>SEO fee to date</span><span class='v n'>%s</span></div></div>"
             % (month, money(H['radio_rr'] / H['dm']), money(H['seo'] / H['dm']), month, money(H['radio_rr']), money(H['seo']), H['el'], H['dm'], money(m['radio']), money(m['fee'])))
+
+
+def r_datebar(c, H):
+    month = MONTH_NAMES[H['R'].month - 1]
+    prev = MONTH_NAMES[H['pm_last'].month - 1]
+    return ("<span>vs %s (same elapsed days) &middot; run-rate vs %s plan: spend %s, gross adds %s, CPA target = %s&rsquo;s CPA (%s)</span>"
+            % (H['lm_label'], month, money(H['plan']), num(H['ga_target']), prev, '$%.2f' % H['target_cpa']))
+
+
+def r_budget_head(c, H):
+    return 'MTD through %d %s (%d of %d days).' % (H['R'].day, MON[H['R'].month - 1], H['el'], H['dm'])
+
+
+def r_radio_other(c, H):
+    m = H['m']
+    month = MONTH_NAMES[H['R'].month - 1]
+    mon = MON[H['R'].month - 1]
+    per_day = H['radio_rr'] / H['dm']
+    rng = '1 &ndash; %d %s' % (H['dm'], mon)
+    return ("<h2 class='sect'>Radio (NZME)</h2><p class='ss'>No digital tracking &mdash; the %s %s budget is assumed to be spent equally per day (%s/day), so spend to date is an estimate, "
+            "not an invoice-to-date.</p><div class='kpis'><div class='kpi'><p class='lbl'>Spend to date (%s)</p><p class='val n'>%s</p><p class='dl'><span class='pv'>of %s %s budget</span></p></div>"
+            "<div class='kpi'><p class='lbl'>Period</p><p class='val n' style='font-size:20px'>%s</p><p class='dl'><span class='pv'>%d of %d days elapsed</span></p></div>"
+            "<div class='kpi'><p class='lbl'>Pace</p><p class='val n'>On pace</p><p class='dl'><span class='pv'>%s/day &middot; equal daily spend assumed</span></p></div></div>"
+            % (money(H['radio_rr']), month, money(per_day), mon, money(m['radio']), money(H['radio_rr']), month, rng, H['el'], H['dm'], money(per_day)))
 
 
 # ------------------------------------------------------------------ SVG helpers
@@ -501,37 +530,46 @@ def patch_trends(html, c, H):
 
 
 # ------------------------------------------------------------------ markers + assembly
-REGIONS = ['big', 'lead', 'kpis', 'bars', 'rsc', 'trend', 'budget']
+REGIONS = ['big', 'lead', 'kpis', 'bars', 'rsc', 'trend', 'budget', 'datebar', 'budget_head', 'radio_other']
 
 
-def region_bounds(html):
-    """Locate each owned region in an un-marked page (used by --init)."""
+def region_bounds(html, name):
+    """Locate one owned region in a page where its marker is missing (used by --init)."""
     hs = html.index("<div class='hero'>")
-    out = {}
-    m = re.compile(r"<div class='big dp'[^>]*>.*?</div>", re.S).search(html, hs); out['big'] = (m.start(), m.end())
-    m = re.compile(r"<b>Run-rate spend is.*?and \$[\d,]+\.", re.S).search(html, hs); out['lead'] = (m.start(), m.end())
-    ks = html.index("<div class='kpis'>", hs); ke = html.index("<div class='split'", ks); out['kpis'] = (ks, ke)
-    bs = html.index("<div class='bar-row'>", ke); be = html.index("</div><div class='card'><h3>Radio (NZME)", bs) + 6
-    out['bars'] = (bs, be)
-    rs = html.index("<div class='card'><h3>Radio (NZME)", be)
-    re_ = html.index("SEO fee to date", rs)
-    re_ = html.index("</div></div>", re_) + len("</div></div>")
-    out['rsc'] = (rs, re_ - 6)   # card incl. its own closing </div>, excl. the split's </div>
-    ts = html.index("<p class='ss'>Blended across all channels", re_)
-    te = html.index('\n</div>\n\n<div class="view" id="view-channels">', ts)
-    out['trend'] = (ts, te)
+    if name == 'big':
+        m = re.compile(r"<div class='big dp'[^>]*>.*?</div>", re.S).search(html, hs); return m.start(), m.end()
+    if name == 'lead':
+        m = re.compile(r"<b>Run-rate spend is.*?and \$[\d,]+\.", re.S).search(html, hs); return m.start(), m.end()
+    if name == 'kpis':
+        ks = html.index("<div class='kpis'>", hs); return ks, html.index("<div class='split'", ks)
+    ke = html.index("<div class='split'", hs)
+    if name == 'bars':
+        bs = html.index("<div class='bar-row'>", ke); return bs, html.index("</div><div class='card'><h3>Radio (NZME)", bs) + 6
+    if name == 'rsc':
+        bs = html.index("<div class='bar-row'>", ke); be = html.index("</div><div class='card'><h3>Radio (NZME)", bs) + 6
+        rs = html.index("<div class='card'><h3>Radio (NZME)", be)
+        re_ = html.index("</div></div>", html.index("SEO fee to date", rs)) + len("</div></div>")
+        return rs, re_ - 6
+    if name == 'trend':
+        ts = html.index("<p class='ss'>Blended across all channels")
+        return ts, html.index('\n</div>\n\n<div class="view" id="view-channels">', ts)
     vb = html.index('id="view-budget"')
-    tb = html.index('<table>', vb); te2 = html.index('</table>', tb) + len('</table>')
-    out['budget'] = (tb, te2)
-    return out
+    if name == 'budget':
+        tb = html.index('<table>', vb); return tb, html.index('</table>', tb) + len('</table>')
+    if name == 'datebar':
+        ds = html.index('class="datebar"'); s = html.index('<span>', html.index('</span>', ds)); return s, html.index('</span>', s) + 7
+    if name == 'budget_head':
+        m = re.compile(r"MTD through \d+ \w+ \(\d+ of \d+ days\)\.").search(html, vb); return m.start(), m.end()
+    if name == 'radio_other':
+        s = html.index("<h2 class='sect'>Radio (NZME)</h2>"); return s, html.index("<h2 class='sect'>Twitch &amp; Demand Gen</h2>", s)
+    raise SystemExit('unknown region ' + name)
 
 
 def init_markers(html):
-    if '<!--c:big-->' in html:
-        return html
-    b = region_bounds(html)
-    for name in sorted(b, key=lambda n: -b[n][0]):
-        s, e = b[name]
+    for name in REGIONS:
+        if '<!--c:%s-->' % name in html:
+            continue
+        s, e = region_bounds(html, name)
         html = html[:s] + '<!--c:%s-->' % name + html[s:e] + '<!--/c:%s-->' % name + html[e:]
     return html
 
@@ -549,7 +587,8 @@ def build(html):
     out = html
     # dr-data (radio_cost kept in sync with the config rule)
     out = out[:c.dr_start] + json.dumps(c.dr, separators=(',', ':')) + out[c.dr_end:]
-    gens = dict(big=r_big, lead=r_lead, kpis=r_kpis, bars=r_bars, rsc=r_rsc, trend=r_trend, budget=r_budget)
+    gens = dict(big=r_big, lead=r_lead, kpis=r_kpis, bars=r_bars, rsc=r_rsc, trend=r_trend, budget=r_budget,
+                datebar=r_datebar, budget_head=r_budget_head, radio_other=r_radio_other)
     for name in REGIONS:
         out = replace_region(out, name, gens[name](c, H))
     out = patch_trends(out, c, H)
@@ -568,7 +607,7 @@ def main():
         open(INDEX, 'w', encoding='utf-8').write(new)
         print('markers present')
         return
-    html = init_markers(html) if '<!--c:big-->' not in html else html
+    html = init_markers(html)
     new, c, H = build(html)
     if mode == '--print':
         m = H['m']
