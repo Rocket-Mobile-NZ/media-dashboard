@@ -125,7 +125,7 @@ def hero(c):
     rr_sess = m['sessions'] * f
     target_cpa, tmonth = (c.cfg['cpa_target_override'], None) if c.cfg['cpa_target_override'] else c.prev_month_cpa(R)
     return dict(R=R, el=el, dm=dm, m=m, lm=lm, lw=lw, pw=pw, rr_spend=rr_spend, rr_orders=rr_orders, rr_sess=rr_sess,
-                rr_cpa=rr_spend / rr_orders, radio_rr=radio_rr, seo=seo, target_cpa=target_cpa, pm_last=pm_last,
+                rr_cpa=rr_spend / rr_orders, target_override=bool(c.cfg['cpa_target_override']), radio_rr=radio_rr, seo=seo, target_cpa=target_cpa, pm_last=pm_last,
                 plan=c.cfg.get('spend_plan_by_month', {}).get(mkey(R)) or c.month_budget_total(R), ga_target=c.cfg['gross_adds_target'], ses_target=c.cfg['sessions_target'],
                 label='%s 1-%d' % (MON[R.month - 1], R.day) if R.day > 1 else '%s 1' % MON[R.month - 1],
                 lm_label=('%s 1-%d' % (MON[pm_last.month - 1], min(el, pm_last.day))) if min(el, pm_last.day) > 1 else '%s 1' % MON[pm_last.month - 1])
@@ -206,8 +206,9 @@ def r_rsc(c, H):
 def r_datebar(c, H):
     month = MONTH_NAMES[H['R'].month - 1]
     prev = MONTH_NAMES[H['pm_last'].month - 1]
-    return ("<span>vs %s (same elapsed days) &middot; run-rate vs %s plan: spend %s, gross adds %s, CPA target = %s&rsquo;s CPA (%s)</span>"
-            % (H['lm_label'], month, money(H['plan']), num(H['ga_target']), prev, '$%.2f' % H['target_cpa']))
+    basis = ('CPA target %s' % ('$%.2f' % H['target_cpa'])) if H['target_override'] else ('CPA target = %s&rsquo;s CPA (%s)' % (prev, '$%.2f' % H['target_cpa']))
+    return ("<span>vs %s (same elapsed days) &middot; run-rate vs %s plan: spend %s, gross adds %s, %s</span>"
+            % (H['lm_label'], month, money(H['plan']), num(H['ga_target']), basis))
 
 
 def r_budget_head(c, H):

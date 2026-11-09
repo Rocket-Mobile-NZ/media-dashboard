@@ -5,7 +5,7 @@
   "seo_fee_monthly": 5000,
   "commission_pct": 0.15,
   "commission_ends": "2026-09-01",
-  "cpa_target_override": null,
+  "cpa_target_override": 61,
   "radio_budget": {
     "2026-10": 30066,
     "2026-11": 46366
