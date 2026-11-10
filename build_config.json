@@ -1,11 +1,10 @@
 {
-  "_comment": "Inputs for build.py. Edit only at month rollover (budgets, radio, targets). The spend plan defaults to that month's total budget (channel budgets + Radio + SEO fee); set spend_plan_by_month to override. The CPA target = previous month's CPA (mom-data, else computed) unless cpa_target_override is set.",
+  "_comment": "Inputs for build.py. Edit only at month rollover (budgets, radio). Spend plan = that month's total budget (channel budgets + Radio + SEO fee). CPA target and GA4 sessions target = rolling average of the last 3 COMPLETE months (CPA pooled = total spend / total orders; sessions = mean of monthly GA4 sessions) unless cpa_target_override / sessions_target_override is set.",
   "gross_adds_target": 2300,
-  "sessions_target": 62302,
   "seo_fee_monthly": 5000,
   "commission_pct": 0.15,
   "commission_ends": "2026-09-01",
-  "cpa_target_override": 61,
+  "cpa_target_override": null,
   "radio_budget": {
     "2026-10": 30066,
     "2026-11": 46366
@@ -37,5 +36,6 @@
   "manual_mtd": {
     "twitch": 0,
     "demand_gen": 0
-  }
+  },
+  "sessions_target_override": null
 }

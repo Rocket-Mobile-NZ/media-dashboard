@@ -52,6 +52,10 @@ class Calc:
         self.dr_start = s
         m = re.search(r"<script id='mom-data' type='application/json'>(.*?)</script>", html, re.S)
         self.mom = json.loads(m.group(1))
+        mb = re.search(r"<script id='bench-data' type='application/json'>(.*?)</script>", html, re.S)
+        if not mb:
+            raise SystemExit("build.py: <script id='bench-data'> block is missing")
+        self.bench_raw = json.loads(mb.group(1))
         self.D = self.dr['dates']
         self.idx = {d: i for i, d in enumerate(self.D)}
         self.R = dt.date.fromisoformat(self.D[-1])
@@ -98,6 +102,69 @@ class Calc:
         k = mkey(d)
         return sum(self.cfg['budgets'][k].values()) + self.cfg['radio_budget'].get(k, 0) + self.cfg['seo_fee_monthly']
 
+    # ---- 3-month rolling benchmark (the last three COMPLETE calendar months before the reporting month)
+    def bm_months(self):
+        d = self.R.replace(day=1)
+        out = []
+        for _ in range(3):
+            d = (d - dt.timedelta(days=1)).replace(day=1)
+            out.append(d)
+        return sorted(out)
+
+    def month_spend_orders(self, first):
+        k = mkey(first)
+        if k in self.mom and self.mom[k].get('spend') and self.mom[k].get('gas'):
+            return self.mom[k]['spend'], self.mom[k]['gas']
+        w = self.W(first, first.replace(day=dim(first)))
+        return w['spend'], w['orders']
+
+    def bm_targets(self):
+        ms = self.bm_months()
+        sp = od = 0.0
+        ses = []
+        for first in ms:
+            s, o = self.month_spend_orders(first)
+            sp += s
+            od += o
+            b = self.bench_raw['months'].get(mkey(first))
+            if not b:
+                raise SystemExit('build.py: bench-data has no entry for %s (month rollover step: add the previous month)' % mkey(first))
+            ses.append(b['sessions_total'])
+        return dict(cpa=sp / od, spend=sp, orders=od, sessions=sum(ses) / len(ses), months=ms)
+
+    def bench(self, g):
+        """3-month totals for one channel group (search, pmax, meta, tiktok, chatgpt, direct, organic, ai, other)."""
+        out = dict(sessions=0, purchases=0, cost=0.0, clicks=0.0, impr=0.0)
+        for first in self.bm_months():
+            k = mkey(first)
+            b = self.bench_raw['months'].get(k)
+            if not b:
+                raise SystemExit('build.py: bench-data has no entry for %s' % k)
+            gs = b['groups']
+            if g == 'other':
+                out['sessions'] += b['sessions_total'] - sum(v[0] for v in gs.values())
+                out['purchases'] += b['purchases_total'] - sum(v[1] for v in gs.values())
+            else:
+                out['sessions'] += gs[g][0]
+                out['purchases'] += gs[g][1]
+            ix = [self.idx[d.isoformat()] for d in daterange(first, first.replace(day=dim(first))) if d.isoformat() in self.idx]
+            if g in CH:
+                out['cost'] += sum(self.dr['channels'][g]['cost'][i] for i in ix)
+                out['clicks'] += sum(self.dr['channels'][g]['clicks'][i] for i in ix)
+                out['impr'] += sum(self.dr['channels'][g]['impr'][i] for i in ix)
+            elif g == 'chatgpt':
+                out['cost'] += sum(self.dr['chatgpt_cost'][i] for i in ix)
+        return out
+
+    def mtd_cost(self, g):
+        first = self.R.replace(day=1)
+        ix = [self.idx[d.isoformat()] for d in daterange(first, self.R)]
+        if g in CH:
+            return sum(self.dr['channels'][g]['cost'][i] for i in ix), sum(self.dr['channels'][g]['clicks'][i] for i in ix), sum(self.dr['channels'][g]['impr'][i] for i in ix)
+        if g == 'chatgpt':
+            return sum(self.dr['chatgpt_cost'][i] for i in ix), 0, 0
+        return None, None, None
+
     def prev_month_cpa(self, d):
         pm = (d.replace(day=1) - dt.timedelta(days=1))
         k = mkey(pm)
@@ -123,10 +190,13 @@ def hero(c):
     rr_spend = m['media'] * f + radio_rr + seo
     rr_orders = m['orders'] * f
     rr_sess = m['sessions'] * f
-    target_cpa, tmonth = (c.cfg['cpa_target_override'], None) if c.cfg['cpa_target_override'] else c.prev_month_cpa(R)
+    bt = c.bm_targets()
+    target_cpa = c.cfg['cpa_target_override'] or bt['cpa']
+    ses_target = c.cfg.get('sessions_target_override') or bt['sessions']
+    bm_label = '%s&ndash;%s' % (MON[bt['months'][0].month - 1], MON[bt['months'][-1].month - 1])
     return dict(R=R, el=el, dm=dm, m=m, lm=lm, lw=lw, pw=pw, rr_spend=rr_spend, rr_orders=rr_orders, rr_sess=rr_sess,
                 rr_cpa=rr_spend / rr_orders, target_override=bool(c.cfg['cpa_target_override']), radio_rr=radio_rr, seo=seo, target_cpa=target_cpa, pm_last=pm_last,
-                plan=c.cfg.get('spend_plan_by_month', {}).get(mkey(R)) or c.month_budget_total(R), ga_target=c.cfg['gross_adds_target'], ses_target=c.cfg['sessions_target'],
+                plan=c.cfg.get('spend_plan_by_month', {}).get(mkey(R)) or c.month_budget_total(R), ga_target=c.cfg['gross_adds_target'], ses_target=ses_target, bm_label=bm_label, bt=bt,
                 label='%s 1-%d' % (MON[R.month - 1], R.day) if R.day > 1 else '%s 1' % MON[R.month - 1],
                 lm_label=('%s 1-%d' % (MON[pm_last.month - 1], min(el, pm_last.day))) if min(el, pm_last.day) > 1 else '%s 1' % MON[pm_last.month - 1])
 
@@ -205,9 +275,9 @@ def r_rsc(c, H):
 
 def r_datebar(c, H):
     month = MONTH_NAMES[H['R'].month - 1]
-    prev = MONTH_NAMES[H['pm_last'].month - 1]
-    basis = ('CPA target %s' % ('$%.2f' % H['target_cpa'])) if H['target_override'] else ('CPA target = %s&rsquo;s CPA (%s)' % (prev, '$%.2f' % H['target_cpa']))
-    return ("<span>vs %s (same elapsed days) &middot; run-rate vs %s plan: spend %s, gross adds %s, %s</span>"
+    tg = ('CPA target %s and GA4 sessions target %s' % ('$%.2f' % H['target_cpa'], num(H['ses_target'])))
+    basis = ('%s = rolling average of the last 3 months (%s)' % (tg, H['bm_label'])) if not c.cfg['cpa_target_override'] else tg
+    return ("<span>vs %s (same elapsed days) &middot; run-rate vs %s plan: spend %s, gross adds %s; %s</span>"
             % (H['lm_label'], month, money(H['plan']), num(H['ga_target']), basis))
 
 
@@ -530,6 +600,174 @@ def patch_trends(html, c, H):
     return html[:t0] + seg + html[t1:]
 
 
+
+# ------------------------------------------------------------------ benchmark patches (Channels table + channel pages)
+ROWMAP = {'Google Search': 'search', 'Google PMax': 'pmax', 'Meta': 'meta', 'TikTok': 'tiktok', 'ChatGPT Ads': 'chatgpt',
+          'Direct': 'direct', 'Organic': 'organic', 'AI Assistant': 'ai', 'Other': 'other'}
+PAGEMAP = {'search': 'search', 'pmax': 'pmax', 'meta': 'meta', 'tiktok': 'tiktok', 'other': 'chatgpt'}
+PAID = ('search', 'pmax', 'meta', 'tiktok', 'chatgpt')
+
+
+def dtxt(cur, bm, lower_better, dec=0, sp=''):
+    """Delta of cur vs a benchmark value, as a coloured span (arrow shows direction, colour shows good/bad)."""
+    if cur is None or bm in (None, 0):
+        return "<span class='flat'>&mdash;</span>"
+    pc = (cur / bm - 1) * 100
+    if abs(pc) < 0.5 * (10 ** -dec):
+        return "<span class='flat'>0%s%%</span>" % ('.' + '0' * dec if dec else '')
+    good = pc < 0 if lower_better else pc > 0
+    return "<span class='%s'>%s%s%.*f%%</span>" % ('up' if good else 'down', '&#9650;' if pc > 0 else '&#9660;', sp, dec, abs(pc))
+
+
+def pnum(s):
+    s = re.sub(r'<[^>]+>', '', s or '').replace('&mdash;', '').replace('$', '').replace('%', '').replace(',', '').strip()
+    try:
+        return float(s)
+    except ValueError:
+        return None
+
+
+SPAN_RE = re.compile(r"<span class='small[^']*'>(?:<span[^>]*>[^<]*</span>)?[^<]*</span>")
+
+
+def split_cell(td):
+    m = re.match(r"<td class='r(?: stacked)?'>(.*)</td>$", td, re.S)
+    inner = m.group(1)
+    k = inner.find("<span class='small")
+    val = inner if k < 0 else inner[:k]
+    spans = SPAN_RE.findall('' if k < 0 else inner[k:])
+    lw = [s for s in spans if re.search(r'\bLW\b', re.sub(r'<[^>]+>', '', s))]
+    return val, lw
+
+
+def mk_cell(val, spans=()):
+    if spans:
+        return "<td class='r stacked'>%s%s</td>" % (val, ''.join(spans))
+    return "<td class='r'>%s</td>" % val
+
+
+def bm_span(delta_html):
+    return "<span class='small dl bm'>%s Bench</span>" % delta_html
+
+
+def bench_remark(c, H):
+    ms = c.bm_months()
+    names = ', '.join(MON[m.month - 1] for m in ms)
+    cov = []
+    for m in ms:
+        b = c.bench_raw['months'][mkey(m)]
+        cov.append('%s %d%%' % (MON[m.month - 1], round(b['purchases_total'] / b['orders'] * 100)))
+    unas = '; '.join('%s %s' % (MON[m.month - 1], num(c.bench_raw['months'][mkey(m)]['sessions_total'] - sum(v[0] for v in c.bench_raw['months'][mkey(m)]['groups'].values()))) for m in ms)
+    tracking = ("Server-side conversion tracking went live on 28 Oct and lifts GA4 Purchase counts from then on (they now exceed SERVCO orders), so purchase, conversion-rate and CPA deltas against this benchmark are flattered; read them as directional. "
+                if ms[0] < dt.date(2026, 11, 1) else '')
+    return ("<p class='ss bmrem'><b>Benchmark</b> (replaces &ldquo;vs LM&rdquo;) = the rolling average of the last 3 completed months (%s). "
+            "For spend, sessions and purchases it is the 3-month average month, pro-rated to the days elapsed this month (%d of %d), so a month-to-date figure and its run-rate show the same %% against it. "
+            "For rates (CPC, CTR, CPM, conversion rate, CPA) it is pooled across the 3 months (total &divide; total). The arrow shows direction; green is favourable (lower spend, CPA, CPC and CPM; higher sessions, purchases, conversion rate and CTR). "
+            "Purchases are the GA4 Purchase key event, which captured %s of SERVCO orders in those months, so the benchmark purchase counts, and any CPA or conversion rate built on them, are understated most for the earliest month. "
+            "Sessions include GA4&rsquo;s unassigned / other bucket (%s sessions per month, inflated by a tracking fault from 23 Sep to 5 Oct). "
+            "%sCampaign, ad-group and creative tables below keep their LW and LM columns; platform-reported CPA and CVR have no benchmark yet.</p>"
+            % (names, H['el'], H['dm'], ', '.join(cov), unas, tracking))
+
+
+def patch_channels(html, c, H):
+    a = html.index('id="view-channels"')
+    b = html.index('id="view-search"')
+    seg = html[a:b]
+    el, dm = H['el'], H['dm']
+    pr = el / dm
+    rows = [r for r in re.findall(r"<tr>.*?</tr>", seg, re.S) if '<td' in r]
+    newseg = seg
+    for r in rows:
+        cells = re.findall(r"<td.*?</td>", r, re.S)
+        name = re.sub(r'<[^>]+>', '', cells[0]).replace('Paid', '').replace('manual', '').strip()
+        g = ROWMAP.get(name)
+        if not g or len(cells) < 11:
+            continue
+        cs = [split_cell(x) for x in cells[1:]]
+        sess, purch = pnum(cs[3][0]), pnum(cs[7][0])
+        bm = c.bench(g)
+        new = list(cells)
+        spend = None
+        if g in PAID:
+            spend = c.mtd_cost(g)[0]
+            rr = spend * dm / el
+            new[1] = mk_cell(money(spend))
+            new[2] = mk_cell(money(rr), ["<span class='small'>%s vs bench</span>" % dtxt(rr, bm['cost'] / 3, True)])
+        if g != 'other' and sess is not None:
+            rs = sess * dm / el
+            new[5] = mk_cell(num(rs), ["<span class='small'>%s vs bench</span>" % dtxt(rs, bm['sessions'] / 3, False)])
+        if purch is not None:
+            new[8] = mk_cell(num(purch), cs[7][1] + [bm_span(dtxt(purch, bm['purchases'] / 3 * pr, False))])
+            if sess:
+                cvr = purch / sess * 100
+                bcvr = bm['purchases'] / bm['sessions'] * 100 if bm['sessions'] else None
+                new[9] = mk_cell('%.2f%%' % cvr, cs[8][1] + [bm_span(dtxt(cvr, bcvr, False))])
+            if g in PAID:
+                if purch and spend:
+                    cpa = spend / purch
+                    bcpa = bm['cost'] / bm['purchases'] if bm['purchases'] else None
+                    new[10] = mk_cell('$%s' % format(round(cpa, 2), ',.2f'), cs[9][1] + [bm_span(dtxt(cpa, bcpa, True))])
+                else:
+                    new[10] = mk_cell('&mdash;')
+        pos = [(m_.start(), m_.end()) for m_ in re.finditer(r"<td.*?</td>", r, re.S)]
+        nr = r
+        for (s_, e_), nc in reversed(list(zip(pos, new))):
+            nr = nr[:s_] + nc + nr[e_:]
+        newseg = newseg.replace(r, nr, 1)
+    # remark paragraph (idempotent)
+    newseg = re.sub(r"<p class='ss bmrem'>.*?</p>", '', newseg, flags=re.S)
+    i = newseg.index('<table')
+    newseg = newseg[:i] + bench_remark(c, H) + newseg[i:]
+    return html[:a] + newseg + html[b:]
+
+
+CARD_RE = re.compile(r"<div class='kpi'><p class='lbl'>(.*?)</p><p class='val n'([^>]*)>(.*?)</p>((?:<p class='dl'>.*?</p>)*)</div>", re.S)
+
+
+def patch_pages(html, c, H):
+    el, dm = H['el'], H['dm']
+    pr = el / dm
+    for page, g in PAGEMAP.items():
+        a = html.index('id="view-%s"' % page)
+        nxt = [m.start() for m in re.finditer(r'id="view-', html) if m.start() > a][0]
+        seg = html[a:nxt]
+        bm = c.bench(g)
+        spend, clicks, impr = c.mtd_cost(g)
+
+        def fix(m):
+            label = re.sub(r'<[^>]+>', '', m.group(1)).strip()
+            attrs, val, dls = m.group(2), m.group(3), re.findall(r"<p class='dl'>.*?</p>", m.group(4), re.S)
+            v = pnum(val)
+            def card(newval, dl_list):
+                return "<div class='kpi'><p class='lbl'>%s</p><p class='val n'%s>%s</p>%s</div>" % (m.group(1), attrs, newval, ''.join(dl_list))
+            def one(d, lower):
+                return ["<p class='dl'>%s <span class='pv'>vs benchmark</span></p>" % d]
+            if label == 'Spend (MTD)':
+                return card(money(spend), one(dtxt(spend, bm['cost'] / 3 * pr, True, 1, ' '), True))
+            if label == 'CPA (GA4 purchases)':
+                bcpa = bm['cost'] / bm['purchases'] if bm['purchases'] else None
+                return card(val, one(dtxt(v, bcpa, True, 1, ' '), True))
+            if label == 'Purchases (GA4)':
+                return card(val, one(dtxt(v, bm['purchases'] / 3 * pr, False, 1, ' '), False))
+            if label == 'Sessions':
+                return card(val, one(dtxt(v, bm['sessions'] / 3 * pr, False, 1, ' '), False))
+            if label == 'CTR':
+                bctr = bm['clicks'] / bm['impr'] * 100 if bm['impr'] else None
+                return card(val, dls[:1] + ["<p class='dl'>%s <span class='pv'>vs benchmark</span></p>" % dtxt(v, bctr, False, 1, ' ')])
+            if label == 'CPM':
+                bcpm = bm['cost'] / bm['impr'] * 1000 if bm['impr'] else None
+                return card(val, dls[:1] + ["<p class='dl'>%s <span class='pv'>vs benchmark</span></p>" % dtxt(v, bcpm, True, 1, ' ')])
+            if label in ('CPA (platform)', 'CVR (platform)'):
+                return card(val, dls[:1] + ["<p class='dl'><span class='flat'>&mdash;</span> <span class='pv'>vs benchmark (not yet available)</span></p>"])
+            return m.group(0)
+        seg = CARD_RE.sub(fix, seg)
+        seg = re.sub(r"<p class='ss bmrem'>.*?</p>", '', seg, flags=re.S)
+        i = seg.index("<div class='kpis'>")
+        seg = seg[:i] + bench_remark(c, H) + seg[i:]
+        html = html[:a] + seg + html[nxt:]
+    return html
+
+
 # ------------------------------------------------------------------ markers + assembly
 REGIONS = ['big', 'lead', 'kpis', 'bars', 'rsc', 'trend', 'budget', 'datebar', 'budget_head', 'radio_other']
 
@@ -593,6 +831,8 @@ def build(html):
     for name in REGIONS:
         out = replace_region(out, name, gens[name](c, H))
     out = patch_trends(out, c, H)
+    out = patch_channels(out, c, H)
+    out = patch_pages(out, c, H)
     return out, c, H
 
 
